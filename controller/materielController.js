@@ -47,24 +47,33 @@ export const getMateriel = async (req, res) => {
     }
 };
 
-// Mettre à jour un matériel
 export const updateMateriel = async (req, res) => {
-    const materielId = req.body.id;
     try {
-        const updates = req.body;
-        const result = await MATERIEL.updateOne({ id: materielId }, { $set: updates });
-
-        if (result.matchedCount === 1 && result.modifiedCount === 1) {
-            res.status(200).json({ message: "Matériel mis à jour avec succès" });
-        } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
-            res.status(200).json({ message: "Aucune modification effectuée" });
-        } else {
-            res.status(404).json({ message: "Matériel non trouvé" });
-        }
+      const materielId = req.body.id;
+      const updates = { ...req.body };
+  
+      // conversion de "on"/undefined -> true/false
+      if (updates.isDisponible !== undefined) {
+        updates.isDisponible = !!updates.isDisponible;
+      }
+  
+      const result = await MATERIEL.updateOne(
+        { id: materielId },
+        { $set: updates }
+      );
+  
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ message: "Matériel non trouvé" });
+      }
+  
+      // Après une mise à jour réussie, redirige vers la liste
+      return res.redirect('/materiels');
     } catch (error) {
-        res.status(500).json({ message: "Erreur serveur lors de la mise à jour du matériel", error });
+      console.error('Erreur serveur lors de la mise à jour du matériel :', error);
+      res.status(500).send("Erreur serveur");
     }
-};
+  };
+  
 
 // Supprimer un matériel
 export const deleteMateriel = async (req, res) => {
@@ -87,11 +96,17 @@ export const listMaterielsView = async (req, res) => {
   };
   
   export const formMaterielView = async (req, res) => {
-    // soit vide pour création, soit chargé pour édition
-    const materiel = req.params.id
-      ? await MATERIEL.findOne({ id: req.params.id }).lean()
-      : null;
-    res.render('materiels/form', { materiel });
+    try {
+      let materiel = null;
+      if (req.params.id) {
+        materiel = await MATERIEL.findOne({ id: parseInt(req.params.id, 10) }).lean();
+      }
+      // Passe toujours errors, même vide
+      res.render('materiels/form', { materiel, errors: [] });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Erreur serveur lors de l'affichage du formulaire.");
+    }
   };
   
 

@@ -11,8 +11,21 @@
     <a href="/materiels" class="btn">← Retour à la liste</a>
   </header>
 
-  <form action="/materiels<%= materiel ? '?_method=PUT' : '' %>/" method="POST">
+  <!-- Affichage des erreurs -->
+  <% if (errors && errors.length) { %>
+    <div class="errors">
+      <ul>
+        <% errors.forEach(err => { %>
+          <li><%= err.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form action="/materiels" method="POST">
     <% if (materiel) { %>
+      <!-- method-override via champ caché -->
+      <input type="hidden" name="_method" value="PUT">
       <input type="hidden" name="id" value="<%= materiel.id %>">
     <% } %>
 
@@ -38,15 +51,19 @@
 
     <label>
       Disponible
-      <input type="checkbox" name="isDisponible" <%= materiel && !materiel.isDisponible ? '' : 'checked' %>>
+      <!-- la valeur "on" sera castée en true dans le controller via !! -->
+      <input type="checkbox" name="isDisponible" <%= materiel && materiel.isDisponible ? 'checked' : '' %>>
     </label>
 
     <label>
       État
-      <select name="state">
+      <select name="state" required>
         <option value="">-- Choisir --</option>
         <% ['Neuf','Correct','Bon','Mauvais'].forEach(s => { %>
-          <option value="<%= s %>" <%= materiel && materiel.state === s ? 'selected' : '' %>><%= s %></option>
+          <option value="<%= s %>"
+            <%= materiel && materiel.state === s ? 'selected' : '' %>>
+              <%= s %>
+          </option>
         <% }) %>
       </select>
     </label>
