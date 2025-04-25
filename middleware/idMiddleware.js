@@ -19,7 +19,7 @@ export const checkId = async (req, res, next) => {
     // Récupérer l'ID de l'utilisateur passé par les paramètres, la query ou le corps de la requête
     const userIdFromParams = req.params.id ? parseInt(req.params.id, 10) : null;
     const userIdFromQuery = req.query.id ? parseInt(req.query.id, 10) : null;
-    const userIdFromBody = req.body.id ? parseInt(req.body.id, 10) : null;
+    const userIdFromBody = req.body && req.body.id ? parseInt(req.body.id, 10) : null;
 
     // Utiliser l'ID trouvé dans l'une des sources, ou null si aucune n'est trouvée
     const userIdFromRequest = userIdFromParams || userIdFromQuery || userIdFromBody;
