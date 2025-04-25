@@ -5,7 +5,7 @@ dotenv.config();
 
 export const checkAdmin = async (req, res, next) => {
   // Obtenir le token du header de la requête
-  const token = req.header('Authorization');
+  const token = req.cookies.token;
 
   // Vérifier si le token existe
   if (!token) {
