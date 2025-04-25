@@ -1,6 +1,9 @@
 import express from "express";
 const router = express.Router();
 import userController from "../controller/userController.js";
+import security from "../middleware/authMiddleware.js";
+import securityId from "../middleware/idMiddleware.js";
+import securityAdmin from "../middleware/adminMiddleware.js";
 
 router.get('/:id', security, securityId, userController.getProfile);
 
