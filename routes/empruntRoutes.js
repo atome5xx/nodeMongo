@@ -1,36 +1,15 @@
 import express from "express";
-import {
-  reserverMateriel,
-  validerReservation,
-  signalerRetour,
-  validerRetour
-} from "../controllers/empruntController.js";
-import { isAuth, isAdmin } from "../middlewares/authMiddleware.js";
+import security from "../middleware/authMiddleware.js";
+import securityAdmin from "../middleware/adminMiddleware.js";
+import empruntController from '../controller/empruntController.js';
 
-import express from 'express';
-import { check, validationResult } from 'express-validator';
+
 const router = express.Router();
 
-router.post("/reserver/:materielId", isAuth, reserverMateriel);
-router.patch("/valider/:empruntId", isAuth, isAdmin, validerReservation);
-router.patch("/retour/:empruntId", isAuth, signalerRetour);
-router.patch("/valider-retour/:empruntId", isAuth, isAdmin, validerRetour);
-import empruntController from '../controller/empruntController.js';
-import checkJWT from '../middleware/authMiddleware.js';
+router.post("/reserver/:materielId", security, empruntController.reserverMateriel);
+router.patch("/valider/:empruntId", security, securityAdmin, empruntController.validerReservation);
+router.patch("/retour/:empruntId", security, empruntController.signalerRetour);
+router.patch("/valider-retour/:empruntId", security, securityAdmin, empruntController.validerRetour);
 
-router.use(checkJWT);
-
-
-// 📌 Un utilisateur peut réserver un matériel
-router.post("/reserver/:materielId", checkJWT, empruntController.reserverMateriel);
-
-// 📌 Un admin peut valider ou refuser une réservation
-router.patch("/valider/:empruntId", checkJWT, checkJWT, empruntController.validerReservation);
-
-// 📌 Un utilisateur peut signaler un retour
-router.patch("/retour/:empruntId", checkJWT, empruntController.signalerRetour);
-
-// 📌 Un admin valide le retour
-router.patch("/valider-retour/:empruntId", checkJWT, checkJWT, empruntController.validerRetour);
 
 export default router;
