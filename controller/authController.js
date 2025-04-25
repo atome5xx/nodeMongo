@@ -51,7 +51,8 @@ export const register = async (req, res) => {
             if (err) {
                 return res.status(500).send('Server error');
             }
-            res.json({ token });
+            res.cookie('token', token, { httpOnly: true });
+            console.log("je suis la");
         });
     } catch (err) {
         res.status(500).send('Server error');
@@ -80,13 +81,19 @@ export const login = async (req, res) => {
             },
         };
 
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+        /*jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
             if (err) {
                 return res.status(500).send('Server error');
             }
-            res.header('Authorization', 'Bearer ' + token);
+            sessionStorage.setItem('token', token);
             res.redirect(`/users/${user.id}`);
-        });
+        });*/
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000
+        }).redirect(`/users/${user.id}`);
     } catch (err) {
         res.status(500).send('Server error');
     }

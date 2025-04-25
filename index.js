@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
+import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -25,6 +26,8 @@ app.set('view engine', 'ejs');
 // 2) Middlewares pour les formulaires & JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use(cookieParser());
 
 // 3) method-override pour supporter PUT/DELETE dans les formulaires HTML
 app.use(methodOverride('_method'));
