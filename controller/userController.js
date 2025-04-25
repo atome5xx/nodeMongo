@@ -144,3 +144,44 @@ export const delEmprunt = async (req, res) => {
         res.status(500).json('Erreur lors de la suppression du matériel dans l\'emprunt.');
     }
 };
+
+// Afficher les emprunts d'un utilisateur
+export const affEmprunt = async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id, 10);
+
+        if (isNaN(userId)) {
+            return res.status(400).json('ID utilisateur invalide.');
+        }
+
+        const user = await USER.findOne({ id: userId }).exec();
+        if (!user) {
+            logger.warn(`Utilisateur non trouvé pour l'ID ${userId}.`);
+            return res.status(404).json('Utilisateur non trouvé.');
+        }
+
+        const empruntIds = user.emprunt;
+
+        if (empruntIds.length === 0) {
+            return res.status(200).json('Aucun emprunt dans la liste.');
+        }
+
+        const materiels = await MATERIEL.find({ id: { $in: empruntIds } }).exec();
+        const materielTitles = materiels.map(materiel => materiel.nom);
+
+        res.status(200).json({ emprunts: materielTitles });
+    } catch (error) {
+        res.status(500).json('Erreur lors de l\'affichage des emprunts.');
+    }
+};
+
+const userController = {
+    getProfile,
+    updateUser,
+    deleteUser,
+    addEmprunt,
+    delEmprunt,
+    affEmprunt
+};
+
+export default userController;
