@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title><%= reservation ? 'Modifier' : 'Nouvelle' %> Réservation</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1><%= reservation ? 'Modifier' : 'Nouvelle' %> Réservation</h1>
+    <a href="/reservations" class="btn">← Retour à la liste</a>
+  </header>
+
+  <form action="/reservations<%= reservation ? '?_method=PUT' : '' %>" method="POST">
+    <% if (reservation) { %>
+      <input type="hidden" name="id" value="<%= reservation.id %>">
+    <% } %>
+
+    <label>
+      ID Utilisateur
+      <input type="number" name="idUser" value="<%= reservation ? reservation.idUser : '' %>" required>
+    </label>
+
+    <label>
+      ID Matériel
+      <input type="number" name="idMateriel" value="<%= reservation ? reservation.idMateriel : '' %>" required>
+    </label>
+
+    <label>
+      Début
+      <input type="datetime-local" name="debutEmprunt"
+             value="<%= reservation ? new Date(reservation.debutEmprunt).toISOString().slice(0,16) : '' %>"
+             required>
+    </label>
+
+    <label>
+      Fin
+      <input type="datetime-local" name="finEmprunt"
+             value="<%= reservation ? new Date(reservation.finEmprunt).toISOString().slice(0,16) : '' %>"
+             required>
+    </label>
+
+    <label>
+      Statut
+      <select name="isValid">
+        <% ['En attente','Non Validé','Validé'].forEach(s => { %>
+          <option value="<%= s %>" <%= reservation && reservation.isValid === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label>
+      Rendu
+      <input type="checkbox" name="isRendu" <%= reservation && reservation.isRendu ? 'checked' : '' %>>
+    </label>
+
+    <button type="submit" class="btn"><%= reservation ? 'Enregistrer' : 'Créer' %></button>
+  </form>
+</body>
+</html>

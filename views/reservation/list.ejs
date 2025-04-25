@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des Réservations</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Liste des Réservations</h1>
+    <a href="/reservations/create" class="btn">Nouvelle réservation</a>
+  </header>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Utilisateur (ID)</th>
+        <th>Matériel (ID)</th>
+        <th>Début</th>
+        <th>Fin</th>
+        <th>Statut</th>
+        <th>Rendu</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% reservations.forEach(r => { %>
+        <tr>
+          <td><%= r.id %></td>
+          <td><%= r.idUser %></td>
+          <td><%= r.idMateriel %></td>
+          <td><%= new Date(r.debutEmprunt).toLocaleString('fr-FR') %></td>
+          <td><%= new Date(r.finEmprunt).toLocaleString('fr-FR') %></td>
+          <td><%= r.isValid %></td>
+          <td><%= r.isRendu ? 'Oui' : 'Non' %></td>
+          <td>
+            <a href="/reservations/<%= r.id %>/edit" class="btn-small">Modifier</a>
+            <form action="/reservations/<%= r.id %>?_method=DELETE" method="POST" style="display:inline">
+              <button type="submit" class="btn-small danger">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

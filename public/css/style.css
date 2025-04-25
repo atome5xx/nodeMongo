@@ -1,0 +1,187 @@
+/* ========== Variables ========== */
+:root {
+    --color-primary: #4CAF50;
+    --color-secondary: #ffffff;
+    --color-bg: #f9f9f9;
+    --color-text: #333333;
+    --color-border: #dddddd;
+    --color-hover: #45a049;
+    --color-danger: #e74c3c;
+    --spacing: 1rem;
+    --radius: 4px;
+    --font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* ========== Global ========== */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: var(--font-stack);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+    padding: var(--spacing);
+  }
+  
+  /* ========== Header ========== */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing);
+  }
+  
+  header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn:hover {
+    background-color: var(--color-hover);
+  }
+  
+  /* ========== Tables ========== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing);
+  }
+  
+  table thead {
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
+  }
+  
+  table th,
+  table td {
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+  
+  table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+  }
+  
+  table tbody tr:nth-child(odd) {
+    background-color: #fcfcfc;
+  }
+  
+  table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Boutons d’action dans les tableaux */
+  .btn-small {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  button.btn-small {
+    border: none;
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  button.btn-small:hover {
+    background-color: var(--color-hover);
+  }
+  
+  button.danger {
+    background-color: var(--color-danger);
+  }
+  
+  button.danger:hover {
+    background-color: darken(var(--color-danger), 5%);
+  }
+  
+  /* ========== Forms ========== */
+  form {
+    background-color: #ffffff;
+    padding: var(--spacing);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    max-width: 600px;
+    margin-bottom: var(--spacing);
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  
+  form input[type="text"],
+  form input[type="number"],
+  form input[type="url"],
+  form input[type="datetime-local"],
+  form select,
+  form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: var(--spacing);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font: inherit;
+  }
+  
+  form textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  form input[type="checkbox"] {
+    margin-right: 0.5rem;
+    transform: scale(1.2);
+    vertical-align: middle;
+  }
+  
+  form button.btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  form button.btn:hover {
+    background-color: var(--color-hover);
+  }
+  
+  /* ========== Responsive ========== */
+  @media (max-width: 600px) {
+    table, form {
+      font-size: 0.9rem;
+    }
+  
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .btn {
+      margin-top: 0.5rem;
+    }
+  }
+  

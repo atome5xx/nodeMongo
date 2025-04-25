@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des Matériels</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Liste des Matériels</h1>
+    <a href="/materiels/create" class="btn">Ajouter un matériel</a>
+  </header>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Numéro de série</th>
+        <th>État</th>
+        <th>Disponible</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% materiels.forEach(m => { %>
+        <tr>
+          <td><%= m.id %></td>
+          <td><%= m.name %></td>
+          <td><%= m.description %></td>
+          <td><%= m.serieNumber %></td>
+          <td><%= m.state %></td>
+          <td><%= m.isDisponible ? 'Oui' : 'Non' %></td>
+          <td>
+            <a href="/materiels/<%= m.id %>/edit" class="btn-small">Modifier</a>
+            <form action="/materiels/<%= m.id %>?_method=DELETE" method="POST" style="display:inline">
+              <button type="submit" class="btn-small danger">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title><%= materiel ? 'Modifier' : 'Ajouter' %> un Matériel</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1><%= materiel ? 'Modifier' : 'Ajouter' %> un Matériel</h1>
+    <a href="/materiels" class="btn">← Retour à la liste</a>
+  </header>
+
+  <form action="/materiels<%= materiel ? '?_method=PUT' : '' %>/" method="POST">
+    <% if (materiel) { %>
+      <input type="hidden" name="id" value="<%= materiel.id %>">
+    <% } %>
+
+    <label>
+      Nom
+      <input type="text" name="name" value="<%= materiel ? materiel.name : '' %>" required>
+    </label>
+
+    <label>
+      Description
+      <textarea name="description" required><%= materiel ? materiel.description : '' %></textarea>
+    </label>
+
+    <label>
+      Numéro de série
+      <input type="number" name="serieNumber" value="<%= materiel ? materiel.serieNumber : '' %>">
+    </label>
+
+    <label>
+      URL de l’image
+      <input type="url" name="picture" value="<%= materiel ? materiel.picture : '' %>">
+    </label>
+
+    <label>
+      Disponible
+      <input type="checkbox" name="isDisponible" <%= materiel && !materiel.isDisponible ? '' : 'checked' %>>
+    </label>
+
+    <label>
+      État
+      <select name="state">
+        <option value="">-- Choisir --</option>
+        <% ['Neuf','Correct','Bon','Mauvais'].forEach(s => { %>
+          <option value="<%= s %>" <%= materiel && materiel.state === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <button type="submit" class="btn"><%= materiel ? 'Enregistrer' : 'Créer' %></button>
+  </form>
+</body>
+</html>
