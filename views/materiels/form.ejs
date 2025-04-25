@@ -24,11 +24,9 @@
 
   <form action="/materiels" method="POST">
     <% if (materiel) { %>
-      <!-- method-override via champ caché -->
       <input type="hidden" name="_method" value="PUT">
       <input type="hidden" name="id" value="<%= materiel.id %>">
     <% } %>
-
     <label>
       Nom
       <input type="text" name="name" value="<%= materiel ? materiel.name : '' %>" required>
@@ -68,7 +66,9 @@
       </select>
     </label>
 
-    <button type="submit" class="btn"><%= materiel ? 'Enregistrer' : 'Créer' %></button>
+    <button type="submit" class="btn">
+      <%= materiel ? 'Enregistrer' : 'Créer' %>
+    </button>
   </form>
 </body>
 </html>

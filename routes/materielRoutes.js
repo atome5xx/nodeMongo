@@ -35,41 +35,39 @@ router.get('/:id/edit', materielController.formMaterielView);
 // ---------------------------------------------------
 // 3) Traitement du formulaire de création (/POST /)
 // ---------------------------------------------------
+// Création
 router.post(
-  '/',
-  validateMateriel,
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      // En cas d’erreurs, on ré-affiche le form avec les données et les messages
-      return res.status(400).render('materiels/form', {
-        materiel: req.body,
-        errors:   errors.array()
-      });
-    }
-    next();
-  },
-  materielController.createMateriel
-);
-
-// ----------------------------------------------------
-// 4) Traitement du formulaire de mise à jour (/PUT /)
-// ----------------------------------------------------
-router.put(
-  '/',
-  validateMateriel,
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).render('materiels/form', {
-        materiel: req.body,
-        errors:   errors.array()
-      });
-    }
-    next();
-  },
-  materielController.updateMateriel
-);
+    '/',
+    validateMateriel,
+    (req, res, next) => {
+      const errs = validationResult(req);
+      if (!errs.isEmpty()) {
+        return res.status(400).render('materiels/form', {
+          materiel: req.body,
+          errors:   errs.array()
+        });
+      }
+      next();
+    },
+    materielController.createMateriel
+  );
+  
+  // Mise à jour
+  router.put(
+    '/',
+    validateMateriel,
+    (req, res, next) => {
+      const errs = validationResult(req);
+      if (!errs.isEmpty()) {
+        return res.status(400).render('materiels/form', {
+          materiel: req.body,
+          errors:   errs.array()
+        });
+      }
+      next();
+    },
+    materielController.updateMateriel
+  );
 
 // --------------------------------------
 // 5) Route de suppression (DELETE /:id)

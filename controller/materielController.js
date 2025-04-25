@@ -1,34 +1,28 @@
 import MATERIEL from "../model/materielModel.js";
 
 export const createMateriel = async (req, res) => {
+    // cast de la checkbox
+    const isDisponible = !!req.body.isDisponible;
+    const data = {
+      name:         req.body.name,
+      description:  req.body.description,
+      serieNumber:  req.body.serieNumber,
+      picture:      req.body.picture,
+      isDisponible,
+      state:        req.body.state
+    };
+  
     try {
-      const {
-        id,
-        name,
-        description,
-        serieNumber,
-        picture,
-        state
-      } = req.body;
-  
-      // ← conversion "on" | undefined → true | false
-      const isDisponible = !!req.body.isDisponible;
-  
-      const newMateriel = new MATERIEL({
-        id,
-        name,
-        description,
-        serieNumber,
-        picture,
-        isDisponible,
-        state
-      });
-  
-      const savedMateriel = await newMateriel.save();
-      res.status(201).json({ message: 'Matériel créé avec succès', data: savedMateriel });
-    } catch (error) {
-      console.error('Erreur lors de la création du matériel :', error.message);
-      res.status(500).json({ message: 'Erreur serveur lors de la création du matériel.' });
+      await new MATERIEL(data).save();
+      // redirection VERS la liste
+      return res.redirect('/materiels');
+    } catch (err) {
+      console.error('Erreur création matériel :', err);
+      // si erreurs Mongoose ou custom, on ré-affiche le form
+      const errors = err.name === 'ValidationError'
+        ? Object.values(err.errors).map(e => ({ msg: e.message }))
+        : [{ msg: err.message }];
+      return res.status(400).render('materiels/form', { materiel: data, errors });
     }
   };
   
@@ -48,31 +42,44 @@ export const getMateriel = async (req, res) => {
 };
 
 export const updateMateriel = async (req, res) => {
+    // on récupère l'id caché et on cast la checkbox
+    const materielId  = req.body.id;
+    const isDisponible = !!req.body.isDisponible;
+    const updates = {
+      name:         req.body.name,
+      description:  req.body.description,
+      serieNumber:  req.body.serieNumber,
+      picture:      req.body.picture,
+      isDisponible,
+      state:        req.body.state
+    };
+  
     try {
-      const materielId = req.body.id;
-      const updates = { ...req.body };
-  
-      // conversion de "on"/undefined -> true/false
-      if (updates.isDisponible !== undefined) {
-        updates.isDisponible = !!updates.isDisponible;
-      }
-  
       const result = await MATERIEL.updateOne(
         { id: materielId },
         { $set: updates }
       );
-  
       if (result.matchedCount === 0) {
-        return res.status(404).json({ message: "Matériel non trouvé" });
+        // cas où l'id n'existe pas
+        return res.status(404).render('materiels/form', {
+          materiel: { id: materielId, ...updates },
+          errors:   [{ msg: 'Matériel non trouvé pour mise à jour.' }]
+        });
       }
-  
-      // Après une mise à jour réussie, redirige vers la liste
+      // redirection vers la liste
       return res.redirect('/materiels');
-    } catch (error) {
-      console.error('Erreur serveur lors de la mise à jour du matériel :', error);
-      res.status(500).send("Erreur serveur");
+    } catch (err) {
+      console.error('Erreur mise à jour matériel :', err);
+      const errors = err.name === 'ValidationError'
+        ? Object.values(err.errors).map(e => ({ msg: e.message }))
+        : [{ msg: err.message }];
+      return res.status(400).render('materiels/form', {
+        materiel: { id: materielId, ...updates },
+        errors
+      });
     }
   };
+  
   
 
 // Supprimer un matériel
