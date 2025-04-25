@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="profile-container">
+        <h2>Profil de l'utilisateur</h2>
+        <div class="user-info">
+            <p><strong>Nom :</strong>
+                <%= user.firstName %>
+                    <%= user.lastName %>
+            </p>
+            <p><strong>Email :</strong>
+                <%= user.email %>
+            </p>
+            <p><strong>Mot de passe :</strong>
+                <%= user.password %>
+            </p>
+        </div>
+
+        <h3>Liste des emprunts</h3>
+        <ul>
+            <% if (user.emprunt && user.emprunt.length> 0) { %>
+                <% user.emprunt.forEach(function(emprunt) { %>
+                    <li>
+                        <%= emprunt.name %> - Emprunté le <%= emprunt.debutEmprunt %>
+                    </li>
+                    <% }); %>
+                        <% } else { %>
+                            <p>Aucun emprunt en cours.</p>
+                            <% } %>
+        </ul>
+
+        <div class="actions">
+            <a href="/edit-profile">Modifier le profil</a>
+            <a href="/logout">Se déconnecter</a>
+        </div>
+    </div>
+</body>
+
+</html>

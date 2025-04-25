@@ -85,7 +85,7 @@ export const login = async (req, res) => {
                 return res.status(500).send('Server error');
             }
             res.header('Authorization', 'Bearer ' + token);
-            res.json({ token });
+            res.redirect(`/users/${user.id}`);
         });
     } catch (err) {
         res.status(500).send('Server error');

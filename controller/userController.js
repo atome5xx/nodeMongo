@@ -6,7 +6,10 @@ export const getProfile = async (req, res) => {
     try {
         const user = await USER.findOne({ id: userId }, { _id: 0 }).exec();
         if (user) {
-            res.json(user);
+            //res.json(user);
+            res.render('profile', {
+                user: user,
+            });
         } else {
             logger.warn(`Utilisateur non trouvé pour l'ID ${userId}.`);
             res.status(404).json('Utilisateur non trouvé.');

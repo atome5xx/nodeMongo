@@ -4,16 +4,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
 
-import authRoutes     from './routes/authRoutes.js';
-import userRoutes     from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import materielRoutes from './routes/materielRoutes.js';
-import empruntRoutes  from './routes/empruntRoutes.js';
+import empruntRoutes from './routes/empruntRoutes.js';
 
 dotenv.config(); // Doit être appelé avant tout autre code
 
 // Pour __dirname en ESM
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,9 +32,13 @@ app.use(methodOverride('_method'));
 // 4) Dossier static pour CSS, images…
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
+app.get('/', (req, res) => {
+  res.render('authentification/login');
+});
+
 app.use('/connection', authRoutes);
-app.use('/users',      userRoutes);
-app.use('/materiels',  materielRoutes);   // → liste / create / :id / :id/edit / etc.
+app.use('/users', userRoutes);
+app.use('/materiels', materielRoutes);   // → liste / create / :id / :id/edit / etc.
 app.use('/reservations', empruntRoutes);  // → liste / create / :id / :id/edit / etc.
 
 app.listen(PORT, () => {
