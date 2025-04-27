@@ -10,7 +10,7 @@ export const register = async (req, res) => {
     try {
         let user = await USER.findOne({ email });
         if (user) {
-            return res.status(400).json({ msg: 'User already exists' });
+            return res.status(400).render('authentification/creation', { error: 'User already exists' });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -47,13 +47,12 @@ export const register = async (req, res) => {
             return res.status(500).json({ msg: 'JWT secret is not defined' });
         }
 
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-            if (err) {
-                return res.status(500).send('Server error');
-            }
-            res.cookie('token', token, { httpOnly: true });
-            console.log("je suis la");
-        });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000
+        }).redirect(`/users/${user.id}`);
     } catch (err) {
         res.status(500).send('Server error');
     }
@@ -66,12 +65,12 @@ export const login = async (req, res) => {
     try {
         const user = await USER.findOne({ email }).exec();
         if (!user) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).render('authentification/login', { error: 'Email ou mot de passe incorrect.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).render('authentification/login', { error: 'Email ou mot de passe incorrect.' });
         }
 
         const payload = {
@@ -80,14 +79,6 @@ export const login = async (req, res) => {
                 isAdmin: user.isAdmin,
             },
         };
-
-        /*jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-            if (err) {
-                return res.status(500).send('Server error');
-            }
-            sessionStorage.setItem('token', token);
-            res.redirect(`/users/${user.id}`);
-        });*/
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
             httpOnly: true,
@@ -99,7 +90,13 @@ export const login = async (req, res) => {
     }
 };
 
+export const deconnect = async (req, res) => {
+    res.clearCookie('token');
+    res.redirect('/');
+}
+
 export default {
     register,
     login,
+    deconnect,
 };

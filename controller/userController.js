@@ -7,7 +7,7 @@ export const getProfile = async (req, res) => {
         const user = await USER.findOne({ id: userId }, { _id: 0 }).exec();
         if (user) {
             //res.json(user);
-            res.render('profile', {
+            res.render('user/profile', {
                 user: user,
             });
         } else {

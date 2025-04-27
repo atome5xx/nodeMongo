@@ -11,20 +11,26 @@
 <body>
     <div class="login-container">
         <h2>Connexion</h2>
-        <form action="/connection/login" method="POST">
-            <div class="input-group">
-                <label for="email">Email :</label>
-                <input type="email" id="email" name="email" required placeholder="Entrez votre email">
+        <% if (typeof error !=='undefined' ) { %>
+            <div class="error-message">
+                <%= error %>
             </div>
-            <div class="input-group">
-                <label for="password">Mot de passe :</label>
-                <input type="password" id="password" name="password" required placeholder="Entrez votre mot de passe">
-            </div>
-            <button type="submit">Se connecter</button>
-        </form>
-        <div class="register-link">
-            <p>Pas encore de compte ? <a href="/register">Créer un compte</a></p>
-        </div>
+            <% } %>
+                <form action="/connection/login" method="POST">
+                    <div class="input-group">
+                        <label for="email">Email :</label>
+                        <input type="email" id="email" name="email" required placeholder="Entrez votre email">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Mot de passe :</label>
+                        <input type="password" id="password" name="password" required
+                            placeholder="Entrez votre mot de passe">
+                    </div>
+                    <button type="submit">Se connecter</button>
+                </form>
+                <div class="register-link">
+                    <p>Pas encore de compte ? <a href="register">Créer un compte</a></p>
+                </div>
     </div>
 </body>
 

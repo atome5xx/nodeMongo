@@ -10,19 +10,10 @@
 
 <body>
     <div class="profile-container">
-        <h2>Profil de l'utilisateur</h2>
-        <div class="user-info">
-            <p><strong>Nom :</strong>
-                <%= user.firstName %>
-                    <%= user.lastName %>
-            </p>
-            <p><strong>Email :</strong>
-                <%= user.email %>
-            </p>
-            <p><strong>Mot de passe :</strong>
-                <%= user.password %>
-            </p>
-        </div>
+        <h2>
+            <%= user.firstName %>
+                <%= user.lastName %>
+        </h2>
 
         <h3>Liste des emprunts</h3>
         <ul>
@@ -38,8 +29,18 @@
         </ul>
 
         <div class="actions">
+            <% if (user.isAdmin) { %>
+                <a href="">Voir les demandes d'emprunts</a>
+                <a href="">Voir les retours</a>
+                <a href="">Gérer le matériel</a>
+                <% } %>
+        </div>
+
+
+        <div class="actions">
+            <a href="">Demande d'emprunt</a>
             <a href="/edit-profile">Modifier le profil</a>
-            <a href="/logout">Se déconnecter</a>
+            <a href="/connection/logout">Se déconnecter</a>
         </div>
     </div>
 </body>

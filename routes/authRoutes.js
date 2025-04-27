@@ -1,6 +1,6 @@
 import express from 'express';
 import { check, validationResult } from 'express-validator';
-import { register, login } from '../controller/authController.js';
+import { register, login, deconnect } from '../controller/authController.js';
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.post(
         console.log('Corps de la requête :', req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).render('authentification/creation', { errors: errors.array() });
         }
         next();
     },
@@ -37,6 +37,18 @@ router.post(
         next();
     },
     login
+);
+
+router.get(
+    '/register',
+    (req, res, next) => {
+        res.render('authentification/creation');
+    },
+);
+
+router.get(
+    '/logout',
+    deconnect
 );
 
 export default router;
