@@ -7,6 +7,7 @@ import empruntController from '../controller/empruntController.js';
 
 const router = express.Router();
 
+router.get('/admin', checkJWT, securityAdmin, empruntController.adminListReservations);
 
 router.post("/", checkJWT, securityAdmin, empruntController.listEmprunts);
 router.get(
@@ -36,7 +37,11 @@ router.post(
   ],
   empruntController.reserverMateriel
 );
-router.patch("/valider/:empruntId", checkJWT, securityAdmin, empruntController.validerReservation);
+router.post(
+  '/valider/:id',
+  checkJWT, securityAdmin,
+  empruntController.validerReservation
+);
 router.patch("/retour/:empruntId", checkJWT, empruntController.signalerRetour);
 router.patch("/valider-retour/:empruntId", checkJWT, securityAdmin, empruntController.validerRetour);
 

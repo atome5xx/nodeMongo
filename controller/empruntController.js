@@ -62,55 +62,38 @@ export const reserverMateriel = async (req, res) => {
  * body { decision: 'refuser' | 'valider' }
  */
 export const validerReservation = async (req, res) => {
-  try {
-    const empruntId = parseInt(req.params.empruntId, 10);
-    const { decision } = req.body; // 'refuser' ou 'valider'
-    const emprunt = await EMPRUNT.findOne({ id: empruntId });
-    if (!emprunt) {
-      return res.status(404).json({ message: 'Réservation non trouvée.' });
-    }
+  const { id } = req.params;            // _id du document
+  const { decision } = req.body;        // 'valider' ou 'refuser'
 
-    // Détermination du nouveau statut
+  try {
+    const emprunt = await EMPRUNT.findById(id)
+      .populate('user', 'firstName lastName email')
+      .populate('materiel', 'name');
+    if (!emprunt) return res.status(404).send('Réservation non trouvée.');
+
     const statut = decision === 'refuser' ? 'Non Validé' : 'Validé';
     emprunt.isValid = statut;
     await emprunt.save();
 
-    // Mise à jour de la dispo du matériel
-    const materiel = await MATERIEL.findOne({ id: emprunt.idMateriel });
-    if (!materiel) {
-      return res.status(500).json({ message: 'Matériel lié non trouvé.' });
-    }
-    materiel.isDisponible = (statut === 'Validé') ? false : true;
-    await materiel.save();
+    // Mettre à jour la dispo du matériel
+    emprunt.materiel.isDisponible = (statut === 'Validé') ? false : true;
+    await emprunt.materiel.save();
 
-    // Envoi d'email à l'utilisateur
-    const user = await USER.findOne({ id: emprunt.idUser });
-    if (!user) {
-      return res.status(500).json({ message: 'Utilisateur lié non trouvé.' });
-    }
+    // Envoi d'email (facultatif)
 
+    // Rendre la vue de confirmation
     if (statut === 'Validé') {
-      await sendEmail(
-        user.email,
-        'Confirmation de réservation',
-        'Votre réservation a été validée.',
-        `<p>Bonjour ${user.firstName || user.nom},<br>Votre réservation pour <strong>${materiel.name || materiel.nom}</strong> a été <strong>validée</strong>.</p>`
-      );
+      return res.render('reservations/validated', { reservation: emprunt });
     } else {
-      await sendEmail(
-        user.email,
-        'Réservation refusée',
-        'Votre réservation a été refusée.',
-        `<p>Bonjour ${user.firstName || user.nom},<br>Votre demande de réservation pour <strong>${materiel.name || materiel.nom}</strong> a été <strong>refusée</strong>.</p>`
-      );
+      return res.render('reservations/refused', { reservation: emprunt });
     }
 
-    res.json({ message: `Réservation ${statut === 'Validé' ? 'validée' : 'refusée'} et email envoyé.` });
-  } catch (error) {
-    console.error('Erreur validation réservation :', error);
-    res.status(500).json({ message: 'Erreur serveur lors de la validation de la réservation.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Erreur serveur lors de la validation.');
   }
 };
+
 
 export const reservationFormView = async (req, res) => {
   const materielId = parseInt(req.params.materielId, 10);
@@ -124,6 +107,19 @@ export const reservationFormView = async (req, res) => {
     console.error('Erreur affichage form réservation :', err);
     res.status(500).send('Erreur serveur.');
   }
+};
+
+export const adminListReservations = async (req, res) => {
+  const all = await EMPRUNT
+    .find({})
+    .populate('user', 'firstName lastName')
+    .populate('materiel', 'name')
+    .lean();
+
+  const pending   = all.filter(r => r.isValid === 'En attente');
+  const processed = all.filter(r => r.isValid !== 'En attente');
+
+  res.render('reservations/admin_list', { pending, processed });
 };
 
 /**
@@ -215,7 +211,8 @@ const empruntController = {
   reserverMateriel,
   signalerRetour, 
   listEmprunts,
-  reservationFormView
+  reservationFormView,
+  adminListReservations
 };
 
 export default empruntController;

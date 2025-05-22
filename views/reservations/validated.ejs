@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Réservation Validée</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Réservation Validée ✅</h1>
+    <a href="/reservations/admin" class="btn">← Retour à la gestion</a>
+  </header>
+
+  <section class="message success">
+    <p>
+      La réservation <strong>#<%= reservation.id %></strong> pour  
+      <em><%= reservation.materiel.name %></em>  
+      par <%= reservation.user.firstName %> <%= reservation.user.lastName %>  
+      a bien été <strong>validée</strong>.
+    </p>
+    <p>Période : du <%= new Date(reservation.debutEmprunt).toLocaleString('fr-FR') %>  
+      au <%= new Date(reservation.finEmprunt).toLocaleString('fr-FR') %>.</p>
+  </section>
+</body>
+</html>

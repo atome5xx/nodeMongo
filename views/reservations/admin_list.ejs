@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin • Gestion des Réservations</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Gestion des Réservations</h1>
+    <a href="/materiels" class="btn">← Retour Matériels</a>
+  </header>
+
+  <!-- Section : En attente -->
+  <section>
+    <h2>Réservations en attente</h2>
+    <% if (pending.length === 0) { %>
+      <p>Aucune réservation en attente.</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Utilisateur</th>
+            <th>Matériel</th>
+            <th>Du</th>
+            <th>Au</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pending.forEach(r => { %>
+            <tr>
+              <td><%= r.id %></td>
+              <td><%= r.user.firstName %> <%= r.user.lastName %></td>
+              <td><%= r.materiel.name %></td>
+              <td><%= new Date(r.debutEmprunt).toLocaleString('fr-FR') %></td>
+              <td><%= new Date(r.finEmprunt).toLocaleString('fr-FR') %></td>
+              <td>
+              <form action="/reservations/valider/<%= r._id %>" method="POST" style="display:inline">
+                  <input type="hidden" name="_method" value="PATCH">
+                  <input type="hidden" name="decision" value="valider">
+                  <button class="btn-small" type="submit">Valider</button>
+                </form>
+                <form action="/reservations/valider/<%= r._id %>" method="POST" style="display:inline; margin-left:4px;">
+                  <input type="hidden" name="_method" value="PATCH">
+                  <input type="hidden" name="decision" value="refuser">
+                  <button class="btn-small danger" type="submit">Refuser</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+
+  <!-- Section : Traitée -->
+  <section style="margin-top:40px;">
+    <h2>Réservations traitées</h2>
+    <% if (processed.length === 0) { %>
+      <p>Aucune réservation traitée.</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Utilisateur</th>
+            <th>Matériel</th>
+            <th>Du</th>
+            <th>Au</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% processed.forEach(r => { %>
+            <tr>
+              <td><%= r.id %></td>
+              <td><%= r.user.firstName %> <%= r.user.lastName %></td>
+              <td><%= r.materiel.name %></td>
+              <td><%= new Date(r.debutEmprunt).toLocaleString('fr-FR') %></td>
+              <td><%= new Date(r.finEmprunt).toLocaleString('fr-FR') %></td>
+              <td><%= r.isValid %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params  = new URLSearchParams(window.location.search);
+      const success = params.get('success');
+      const error   = params.get('error');
+
+      if (success) showToast(success, 'success');
+      if (error)   showToast(error,   'error');
+
+      function showToast(msg, type) {
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        // small delay for transition
+        setTimeout(() => t.classList.add('visible'), 50);
+        // auto‐dismiss
+        setTimeout(() => {
+          t.classList.remove('visible');
+          setTimeout(() => document.body.removeChild(t), 300);
+        }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>
