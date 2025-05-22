@@ -1,187 +1,431 @@
 /* ========== Variables ========== */
 :root {
-    --color-primary: #4CAF50;
-    --color-secondary: #ffffff;
-    --color-bg: #f9f9f9;
-    --color-text: #333333;
-    --color-border: #dddddd;
-    --color-hover: #45a049;
-    --color-danger: #e74c3c;
-    --spacing: 1rem;
-    --radius: 4px;
-    --font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  /* ========== Global ========== */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body {
-    font-family: var(--font-stack);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    line-height: 1.6;
-    padding: var(--spacing);
-  }
-  
-  /* ========== Header ========== */
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing);
-  }
-  
-  header h1 {
-    font-size: 1.75rem;
-  }
-  
-  .btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background-color: var(--color-primary);
-    color: var(--color-secondary);
-    text-decoration: none;
-    border-radius: var(--radius);
-    transition: background-color 0.2s ease;
-  }
-  
-  .btn:hover {
-    background-color: var(--color-hover);
-  }
-  
-  /* ========== Tables ========== */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: var(--spacing);
-  }
-  
-  table thead {
-    background-color: var(--color-primary);
-    color: var(--color-secondary);
-  }
-  
-  table th,
-  table td {
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    text-align: left;
-  }
-  
-  table tbody tr:nth-child(even) {
-    background-color: #ffffff;
-  }
-  
-  table tbody tr:nth-child(odd) {
-    background-color: #fcfcfc;
-  }
-  
-  table tbody tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  /* Boutons d’action dans les tableaux */
-  .btn-small {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.85rem;
-  }
-  
-  button.btn-small {
-    border: none;
-    background-color: var(--color-primary);
-    color: var(--color-secondary);
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  button.btn-small:hover {
-    background-color: var(--color-hover);
-  }
-  
-  button.danger {
-    background-color: var(--color-danger);
-  }
-  
-  button.danger:hover {
-    background-color: darken(var(--color-danger), 5%);
-  }
-  
-  /* ========== Forms ========== */
+  --color-primary: #4CAF50;
+  --color-secondary: #ffffff;
+  --color-bg: #f9f9f9;
+  --color-text: #333333;
+  --color-border: #dddddd;
+  --color-hover: #45a049;
+  --color-danger: #e74c3c;
+  --spacing: 1rem;
+  --radius: 4px;
+  --font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ========== Global ========== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-stack);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  padding: var(--spacing);
+}
+
+/* ========== Header ========== */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing);
+}
+
+header h1 {
+  font-size: 1.75rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: var(--color-hover);
+}
+
+/* ========== Tables ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing);
+}
+
+table thead {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+}
+
+table th,
+table td {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: #fcfcfc;
+}
+
+table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Boutons d’action dans les tableaux */
+.btn-small {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+button.btn-small {
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button.btn-small:hover {
+  background-color: var(--color-hover);
+}
+
+button.danger {
+  background-color: var(--color-danger);
+}
+
+button.danger:hover {
+  background-color: darken(var(--color-danger), 5%);
+}
+
+/* ========== Forms ========== */
+form {
+  background-color: #ffffff;
+  padding: var(--spacing);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  max-width: 600px;
+  margin-bottom: var(--spacing);
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="url"],
+form input[type="datetime-local"],
+form select,
+form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  margin-bottom: var(--spacing);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+form input[type="checkbox"] {
+  margin-right: 0.5rem;
+  transform: scale(1.2);
+  vertical-align: middle;
+}
+
+form button.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+form button.btn:hover {
+  background-color: var(--color-hover);
+}
+
+/* THOMAS */
+
+.wrapper {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  /* centre verticalement et horizontalement */
+}
+
+.login-container {
+  background: #fff;
+  padding: 40px 50px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.login-container h2 {
+  margin-bottom: 25px;
+  color: #333;
+  text-align: center;
+}
+
+.error-message {
+  background-color: #ffdddd;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #555;
+  font-weight: 600;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 14px 0;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.register-link {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.register-link a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+.form {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Champs */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
+}
+
+/* Bouton */
+button[type="submit"],
+.creation {
+  width: 100%;
+  padding: 14px 0;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover,
+.creation:hover {
+  background-color: #0056b3;
+}
+
+/* Messages d'erreur */
+.error-message,
+.error-messages {
+  background-color: #ffe5e5;
+  color: #b10000;
+  border: 1px solid #b10000;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.error-messages ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.error-messages li {
+  margin-bottom: 5px;
+}
+
+.profile-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.profile-container h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.profile-container h3 {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #007bff;
+}
+
+ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-bottom: 30px;
+}
+
+ul li {
+  margin-bottom: 8px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.actions a {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.actions a:hover {
+  background-color: #0056b3;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 600px) {
+
+  table,
   form {
-    background-color: #ffffff;
-    padding: var(--spacing);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    max-width: 600px;
-    margin-bottom: var(--spacing);
+    font-size: 0.9rem;
   }
-  
-  form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  
-  form input[type="text"],
-  form input[type="number"],
-  form input[type="url"],
-  form input[type="datetime-local"],
-  form select,
-  form textarea {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 0.25rem;
-    margin-bottom: var(--spacing);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    font: inherit;
+
+  .btn {
+    margin-top: 0.5rem;
   }
-  
-  form textarea {
-    resize: vertical;
-    min-height: 80px;
+
+  .profile-container {
+    padding: 20px;
+    margin: 20px;
   }
-  
-  form input[type="checkbox"] {
-    margin-right: 0.5rem;
-    transform: scale(1.2);
-    vertical-align: middle;
+
+  .actions {
+    flex-direction: column;
+    gap: 10px;
   }
-  
-  form button.btn {
-    display: inline-block;
-    padding: 0.6rem 1.2rem;
-    background-color: var(--color-primary);
-    color: var(--color-secondary);
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
+
+  .actions a {
+    text-align: center;
   }
-  
-  form button.btn:hover {
-    background-color: var(--color-hover);
-  }
-  
-  /* ========== Responsive ========== */
-  @media (max-width: 600px) {
-    table, form {
-      font-size: 0.9rem;
-    }
-  
-    header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  
-    .btn {
-      margin-top: 0.5rem;
-    }
-  }
-  
+}

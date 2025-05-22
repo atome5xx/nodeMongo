@@ -1,75 +1,96 @@
-<% if (typeof error !=='undefined' ) { %>
-    <div class="error-message">
-        <%= error %>
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modification</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <a href="/users/<%= user.id %>">Retour</a>
+    <div class="wrapper">
+        <div class="form-container">
+            <% if (typeof error !=='undefined' ) { %>
+                <div class="error-message">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (typeof errors !=='undefined' && errors.length> 0) { %>
+                        <div class="error-messages">
+                            <ul>
+                                <% errors.forEach(function(err) { %>
+                                    <li>
+                                        <%= err.msg %>
+                                    </li>
+                                    <% }); %>
+                            </ul>
+                        </div>
+                        <% } %>
+
+                            <form action="register" method="POST" class="form">
+                                <input type="hidden" id="userId" value="<%= user.id %>">
+                                <div class="form-group">
+                                    <label for="firstName">Prénom</label>
+                                    <input type="text" id="firstName" name="firstName" value="<%= user.firstName %>"
+                                        required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="lastName">Nom</label>
+                                    <input type="text" id="lastName" name="lastName" value="<%= user.lastName %>"
+                                        required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" value="<%= user.email %>" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Mot de passe</label>
+                                    <input type="password" id="password" name="password" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="button" onclick="updateUser()" class="creation">Modifier mes
+                                        informations</button>
+                                </div>
+                            </form>
+        </div>
     </div>
-    <% } %>
+</body>
 
-        <% if (typeof errors !=='undefined' && errors.length> 0) { %>
-            <div class="error-messages">
-                <ul>
-                    <% errors.forEach(function(err) { %>
-                        <li>
-                            <%= err.msg %>
-                        </li>
-                        <% }); %>
-                </ul>
-            </div>
-            <% } %>
+</html>
 
-                <form id="userForm" class="form">
-                    <input type="hidden" id="userId" value="<%= user.id %>">
+<script>
+    function updateUser() {
+        const id = document.getElementById('userId').value;
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-                    <div class="form-group">
-                        <label for="firstName">Prénom</label>
-                        <input type="text" id="firstName" name="firstName" value="<%= user.firstName %>" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="lastName">Nom</label>
-                        <input type="text" id="lastName" name="lastName" value="<%= user.lastName %>" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" value="<%= user.email %>" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Mot de passe</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="button" onclick="updateUser()">Modifier mes informations</button>
-                    </div>
-                </form>
-
-                <script>
-                    function updateUser() {
-                        const id = document.getElementById('userId').value;
-                        const firstName = document.getElementById('firstName').value;
-                        const lastName = document.getElementById('lastName').value;
-                        const email = document.getElementById('email').value;
-                        const password = document.getElementById('password').value;
-
-                        fetch(`/users/${id}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ id, firstName, lastName, email, password })
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.redirect) {
-                                    window.location.href = data.redirect;
-                                } else {
-                                    alert(data.message);
-                                }
-                            })
-                            .catch(error => {
-                                console.error(error);
-                                alert("Une erreur s'est produite.");
-                            });
-                    }
-                </script>
+        fetch(`/users/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id, firstName, lastName, email, password })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Une erreur s'est produite.");
+            });
+    }
+</script>
