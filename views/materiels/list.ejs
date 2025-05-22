@@ -34,9 +34,20 @@
           <td><%= m.isDisponible ? 'Oui' : 'Non' %></td>
           <td>
             <a href="/materiels/<%= m.id %>/edit" class="btn-small">Modifier</a>
+            
+            <!-- Bouton Supprimer -->
             <form action="/materiels/<%= m.id %>?_method=DELETE" method="POST" style="display:inline">
               <button type="submit" class="btn-small danger">Supprimer</button>
             </form>
+
+            <!-- Bouton Emprunter (si disponible) -->
+           <% if (m.isDisponible) { %>
+  <a href="/reservations/reserver/<%= m.id %>" class="btn-small" style="margin-left:4px;">
+    Emprunter
+  </a>
+<% } else { %>
+  <button class="btn-small danger" disabled>Indisponible</button>
+<% } %>
           </td>
         </tr>
       <% }) %>

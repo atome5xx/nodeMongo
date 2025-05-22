@@ -3,46 +3,56 @@ import USER      from '../model/userModel.js';
 import MATERIEL  from '../model/materielModel.js';
 import sendEmail from '../utils/email.js';
 
-/**
- * 📌 Un utilisateur peut réserver un matériel
- * POST /reserver/:materielId
- */
+
 export const reserverMateriel = async (req, res) => {
   try {
+    console.log('--- reserverMateriel ---');
+    console.log('req.user       =', req.user);
+    console.log('req.params     =', req.params);
+    console.log('req.body       =', req.body);
+
     const userId     = req.user.id;
     const materielId = parseInt(req.params.materielId, 10);
     const { debutEmprunt, finEmprunt } = req.body;
 
-    // Vérification du matériel
+    // 1) Récupère l’utilisateur et le matériel en base
+    const user     = await USER.findOne({ id: userId });
     const materiel = await MATERIEL.findOne({ id: materielId });
-    if (!materiel) {
-      return res.status(404).json({ message: 'Matériel non trouvé.' });
-    }
-    if (!materiel.isDisponible) {
-      return res.status(400).json({ message: 'Matériel non disponible.' });
-    }
-    if (!debutEmprunt || !finEmprunt) {
-      return res.status(400).json({ message: 'Les dates de début et de fin sont requises.' });
+
+    if (!user || !materiel) {
+      console.warn('Utilisateur ou matériel non trouvé.', { user, materiel });
+      return res.status(404).send('Utilisateur ou matériel non trouvé.');
     }
 
-    // Création de la demande de réservation
+    // 2) Vérifier la cohérence des dates
+    const debut = new Date(debutEmprunt);
+    const fin   = new Date(finEmprunt);
+    if (isNaN(debut) || isNaN(fin) || debut >= fin) {
+      console.warn('Dates invalides', { debutEmprunt, finEmprunt });
+      return res.status(400).send('Dates de début/fin invalides ou incohérentes.');
+    }
+
+    // 3) Crée l’emprunt
     const nouvelleResa = new EMPRUNT({
-      idUser:     userId,
-      idMateriel: materielId,
-      debutEmprunt,
-      finEmprunt,
-      isValid: 'En attente',   // statut par défaut
-      isRendu:  false
+      user:        user._id,
+      materiel:    materiel._id,
+      debutEmprunt: debut,
+      finEmprunt:   fin,
+      isValid:     'En attente',
+      isRendu:     false
     });
-    await nouvelleResa.save();
 
-    res.status(201).json({
-      message: 'Réservation enregistrée, en attente de validation.',
-      data: nouvelleResa
-    });
+    const saved = await nouvelleResa.save();
+    console.log('Nouvelle réservation créée:', saved);
+
+     materiel.isDisponible = false;
+    await materiel.save();
+    console.log(`Matériel #${materiel.id} passé en indisponible.`);
+    // 4) Redirection ou JSON
+    return res.redirect('/materiels');
   } catch (error) {
     console.error('Erreur réservation matériel :', error);
-    res.status(500).json({ message: 'Erreur serveur lors de la création de la réservation.' });
+    return res.status(500).send('Erreur serveur lors de la création de la réservation.');
   }
 };
 
@@ -99,6 +109,20 @@ export const validerReservation = async (req, res) => {
   } catch (error) {
     console.error('Erreur validation réservation :', error);
     res.status(500).json({ message: 'Erreur serveur lors de la validation de la réservation.' });
+  }
+};
+
+export const reservationFormView = async (req, res) => {
+  const materielId = parseInt(req.params.materielId, 10);
+  try {
+    const materiel = await MATERIEL.findOne({ id: materielId }).lean();
+    if (!materiel) {
+      return res.status(404).send('Matériel non trouvé.');
+    }
+    res.render('reservations/reserver', { materiel, errors: [] });
+  } catch (err) {
+    console.error('Erreur affichage form réservation :', err);
+    res.status(500).send('Erreur serveur.');
   }
 };
 
@@ -190,7 +214,8 @@ const empruntController = {
   validerRetour,
   reserverMateriel,
   signalerRetour, 
-  listEmprunts
+  listEmprunts,
+  reservationFormView
 };
 
 export default empruntController;

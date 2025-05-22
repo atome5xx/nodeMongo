@@ -1,5 +1,6 @@
 import express from "express";
-import security from "../middleware/authMiddleware.js";
+import { check, validationResult } from 'express-validator';  
+import checkJWT from '../middleware/authMiddleware.js';           // ← au lieu de “security”
 import securityAdmin from "../middleware/adminMiddleware.js";
 import empruntController from '../controller/empruntController.js';
 
@@ -7,11 +8,37 @@ import empruntController from '../controller/empruntController.js';
 const router = express.Router();
 
 
-router.post("/", security, securityAdmin, empruntController.listEmprunts);
-router.post("/reserver/:materielId", security, empruntController.reserverMateriel);
-router.patch("/valider/:empruntId", security, securityAdmin, empruntController.validerReservation);
-router.patch("/retour/:empruntId", security, empruntController.signalerRetour);
-router.patch("/valider-retour/:empruntId", security, securityAdmin, empruntController.validerRetour);
+router.post("/", checkJWT, securityAdmin, empruntController.listEmprunts);
+router.get(
+  '/reserver/:materielId', checkJWT,
+  empruntController.reservationFormView
+);
+
+// Création de la réservation
+router.post(
+  '/reserver/:materielId', 
+  checkJWT,
+  // Validation des dates
+  [
+    check('debutEmprunt', 'Date de début invalide').isISO8601(),
+    check('finEmprunt',  'Date de fin invalide').isISO8601(),
+    (req, res, next) => {
+      const errs = validationResult(req);
+      if (!errs.isEmpty()) {
+        // Re-rendre le form avec les erreurs
+        return res.status(400).render('reservations/reserver', {
+          materiel: { id: req.params.materielId },
+          errors: errs.array()
+        });
+      }
+      next();
+    }
+  ],
+  empruntController.reserverMateriel
+);
+router.patch("/valider/:empruntId", checkJWT, securityAdmin, empruntController.validerReservation);
+router.patch("/retour/:empruntId", checkJWT, empruntController.signalerRetour);
+router.patch("/valider-retour/:empruntId", checkJWT, securityAdmin, empruntController.validerRetour);
 
 
 export default router;

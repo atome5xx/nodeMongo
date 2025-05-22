@@ -1,7 +1,9 @@
 import express from 'express';
 import { check, validationResult } from 'express-validator';
 import materielController from '../controller/materielController.js';
-
+import security from "../middleware/authMiddleware.js";
+import securityId from "../middleware/idMiddleware.js";
+import securityAdmin from "../middleware/adminMiddleware.js";
 const router = express.Router();
 
 // --------------------------------------------------
@@ -27,17 +29,17 @@ const validateMateriel = [
 router.get('/', materielController.listMaterielsView);
 
 // Formulaire de création
-router.get('/create', materielController.formMaterielView);
+router.get('/create',security, securityAdmin, materielController.formMaterielView);
 
 // Formulaire d’édition
-router.get('/:id/edit', materielController.formMaterielView);
+router.get('/:id/edit', security, securityAdmin, materielController.formMaterielView);
 
 // ---------------------------------------------------
 // 3) Traitement du formulaire de création (/POST /)
 // ---------------------------------------------------
 // Création
 router.post(
-    '/',
+    '/', security, securityAdmin,
     validateMateriel,
     (req, res, next) => {
       const errs = validationResult(req);
@@ -54,7 +56,7 @@ router.post(
   
   // Mise à jour
   router.put(
-    '/',
+    '/', security, securityAdmin,
     validateMateriel,
     (req, res, next) => {
       const errs = validationResult(req);
@@ -72,6 +74,6 @@ router.post(
 // --------------------------------------
 // 5) Route de suppression (DELETE /:id)
 // --------------------------------------
-router.delete('/:id', materielController.deleteMateriel);
+router.delete('/:id', security, securityAdmin, materielController.deleteMateriel);
 
 export default router;

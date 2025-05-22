@@ -1,0 +1,42 @@
+<!-- views/reservations/reserver.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Réserver Matériel #<%= materiel.id %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Réserver : <%= materiel.name %></h1>
+    <a href="/materiels" class="btn">← Retour à la liste</a>
+  </header>
+
+  <!-- Erreurs éventuelles -->
+  <% if (errors && errors.length) { %>
+    <div class="errors">
+      <ul>
+        <% errors.forEach(err => { %>
+          <li><%= err.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form action="/reservations/reserver/<%= materiel.id %>" method="POST">
+    <input type="hidden" name="idMateriel" value="<%= materiel.id %>">
+
+    <label>
+      Date de début
+      <input type="datetime-local" name="debutEmprunt" required>
+    </label>
+
+    <label>
+      Date de fin
+      <input type="datetime-local" name="finEmprunt" required>
+    </label>
+
+    <button type="submit" class="btn">Valider la réservation</button>
+  </form>
+</body>
+</html>
