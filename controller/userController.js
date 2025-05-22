@@ -27,6 +27,7 @@ export const updateUser = async (req, res) => {
     const userLastName = req.body.lastName;
     const userEmail = req.body.email;
     const userPassword = req.body.password;
+    console.log(userId);
     try {
         const user = await USER.findOne({ id: userId }, { _id: 0 }).exec();
 
@@ -40,7 +41,10 @@ export const updateUser = async (req, res) => {
             const result = await USER.updateOne({ id: userId }, { $set: misesAJour });
 
             if (result.matchedCount === 1 && result.modifiedCount === 1) {
-                res.status(200).json({ message: "Utilisateur mis à jour avec succès", data: result });
+                res.status(200).json({
+                    message: "Utilisateur mis à jour avec succès",
+                    redirect: `/users/${userId}`
+                });
             } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
                 res.status(200).json({ message: "Aucune modification effectuée" });
             } else {
@@ -178,13 +182,32 @@ export const affEmprunt = async (req, res) => {
     }
 };
 
+export const showEditForm = async (req, res) => {
+    const userId = req.user.id; // ID injecté via le middleware
+
+    try {
+        const user = await USER.findOne({ id: userId }, { _id: 0 }).exec();
+
+        if (user) {
+            res.render('user/edit', { user }); // Affiche edit.ejs avec les infos utilisateur
+        } else {
+            res.redirect('/not-found');
+        }
+    } catch (error) {
+        console.error("Erreur récupération de l'utilisateur :", error);
+        res.redirect('/error');
+    }
+};
+
+
 const userController = {
     getProfile,
     updateUser,
     deleteUser,
     addEmprunt,
     delEmprunt,
-    affEmprunt
+    affEmprunt,
+    showEditForm
 };
 
 export default userController;
