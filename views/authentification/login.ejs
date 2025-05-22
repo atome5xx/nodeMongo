@@ -17,7 +17,7 @@
                     <%= error %>
                 </div>
                 <% } %>
-                    <form action="/connection/login" method="POST">
+                    <form action="/auth/login" method="POST">
                         <div class="input-group">
                             <label for="email">Email :</label>
                             <input type="email" id="email" name="email" required placeholder="Entrez votre email" />
@@ -28,12 +28,12 @@
                                 placeholder="Entrez votre mot de passe" />
                         </div>
                         <div class="register-link">
-                            <p><a href="">Mot de passe oublié?</a></p>
+                            <p><a href="/auth/forgotPassword">Mot de passe oublié ?</a></p>
                         </div>
                         <button type="submit">Se connecter</button>
                     </form>
                     <div class="register-link">
-                        <p>Pas encore de compte ? <a href="/connection/register">Créer un compte</a></p>
+                        <p>Pas encore de compte ? <a href="/auth/register">Créer un compte</a></p>
                     </div>
         </div>
     </div>

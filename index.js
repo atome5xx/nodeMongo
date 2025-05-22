@@ -39,10 +39,12 @@ app.get('/', (req, res) => {
   res.render('authentification/login');
 });
 
-app.use('/connection', authRoutes);
+// Montée des routes avec le bon préfixe "/auth"
+app.use('/auth', authRoutes);
+
 app.use('/users', userRoutes);
-app.use('/materiels', materielRoutes);   // → liste / create / :id / :id/edit / etc.
-app.use('/reservations', empruntRoutes);  // → liste / create / :id / :id/edit / etc.
+app.use('/materiels', materielRoutes);
+app.use('/reservations', empruntRoutes);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

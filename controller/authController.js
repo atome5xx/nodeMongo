@@ -2,6 +2,9 @@ import USER from '../model/userModel.js';
 import Counter from '../model/counterModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import sendEmail from '../utils/email.js';
+
 
 // Fonction d'inscription
 export const register = async (req, res) => {
@@ -95,8 +98,127 @@ export const deconnect = async (req, res) => {
     res.redirect('/');
 }
 
+
+
+
+
+//Forgot password
+
+export const forgotPasswordForm = (req, res) => {
+    res.render('authentification/forgotPassword', { error: null, success: null });
+};
+
+
+
+
+export const sendResetLink = async (req, res) => {
+  const email = req.body.email.toLowerCase();  // conversion en minuscules ici
+  try {
+    const user = await USER.findOne({ email });
+    if (!user) {
+      return res.status(400).render('authentification/forgotPassword', {
+        error: 'Aucun utilisateur trouvé avec cet email.',
+        success: null,
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetToken = token;
+    user.resetTokenExpiry = Date.now() + 3600000; // 1h
+    await user.save();
+
+    const resetUrl = `http://${req.headers.host}/auth/resetPassword/${token}`;
+
+    const html = `
+      <p>Bonjour ${user.firstName},</p>
+      <p>Vous avez demandé une réinitialisation de votre mot de passe.</p>
+      <p>Cliquez sur ce lien pour créer un nouveau mot de passe :</p>
+      <a href="${resetUrl}">${resetUrl}</a>
+      <p>Ce lien expire dans 1 heure.</p>
+    `;
+
+    await sendEmail(
+      user.email,
+      'Réinitialisation de mot de passe',
+      `Visitez ce lien : ${resetUrl}`,
+      html
+    );
+
+    res.render('authentification/forgotPassword', {
+      success: 'Un lien de réinitialisation a été envoyé à votre adresse email.',
+      error: null,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erreur serveur');
+  }
+};
+
+
+  
+
+export const resetPasswordForm = async (req, res) => {
+  const { token } = req.params;
+  console.log('Token reçu :', token);
+  try {
+    const user = await USER.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }
+    });
+    console.log('User trouvé :', user);
+    if (!user) {
+      return res.status(400).send('Lien invalide ou expiré.');
+    }
+    res.render('authentification/resetPassword', { 
+      token, 
+      error: null, 
+      success: null 
+    });
+  } catch (err) {
+    res.status(500).send('Erreur serveur');
+  }
+};
+
+
+
+export const resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+  
+    try {
+      const user = await USER.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: Date.now() }
+      });
+  
+      if (!user) {
+        return res.status(400).send('Lien invalide ou expiré.');
+      }
+  
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+  
+      user.password = hashedPassword;
+      user.resetToken = undefined;
+      user.resetTokenExpiry = undefined;
+      await user.save();
+  
+      res.redirect('/');
+    } catch (err) {
+      res.status(500).send('Erreur serveur');
+    }
+};
+  
+
+
+
+
 export default {
     register,
     login,
     deconnect,
-};
+    forgotPasswordForm,
+    sendResetLink,
+    resetPasswordForm,
+    resetPassword
+  };
