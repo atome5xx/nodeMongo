@@ -231,7 +231,7 @@ form button.btn:hover {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-button[type="submit"] {
+/*button[type="submit"] {
   width: 100%;
   padding: 14px 0;
   background-color: #007bff;
@@ -246,7 +246,7 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
   background-color: #0056b3;
-}
+}*/
 
 .register-link {
   margin-top: 20px;
@@ -303,7 +303,7 @@ button[type="submit"]:hover {
 }
 
 /* Bouton */
-button[type="submit"],
+/*button[type="submit"],
 .creation {
   width: 100%;
   padding: 14px 0;
@@ -315,12 +315,12 @@ button[type="submit"],
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-}
+}*/
 
-button[type="submit"]:hover,
+/*button[type="submit"]:hover,
 .creation:hover {
   background-color: #0056b3;
-}
+}*/
 
 /* Messages d'erreur */
 .error-message,

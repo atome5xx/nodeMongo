@@ -9,7 +9,7 @@ const UserSchema = new Schema({
     email: { type: String, required: true, unique: true, lowercase: true },  // <-- ajout lowercase ici
     password: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
-    emprunt: [Number],
+    emprunt: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Emprunts', default: [] }],
     resetToken: { type: String },           // <-- ajout
     resetTokenExpiry: { type: Number },     // <-- ajout
 }, { collection: 'Users' });

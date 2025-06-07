@@ -1,24 +1,37 @@
 import USER from "../model/userModel.js";
+import Emprunt from "../model/empruntModel.js";
+import MATERIEL from "../model/materielModel.js";
 
 // Afficher les données d'un utilisateur
 export const getProfile = async (req, res) => {
     const userId = parseInt(req.params.id, 10);
     try {
-        const user = await USER.findOne({ id: userId }, { _id: 0 }).exec();
+        const user = await USER.findOne({ id: userId }, { _id: 0 })
+            .populate({
+                path: 'emprunt', // Champ à peupler
+                populate: {
+                    path: 'materiel', // Si tu veux aussi les détails du matériel
+                    model: 'Materiels'
+                }
+            })
+            .exec();
+
         if (user) {
-            //res.json(user);
+            console.log(user.emprunt);
             res.render('user/profile', {
                 user: user,
+                emprunts: user.emprunt, // Liste des emprunts avec détails
             });
         } else {
-            logger.warn(`Utilisateur non trouvé pour l'ID ${userId}.`);
+            console.warn(`Utilisateur non trouvé pour l'ID ${userId}.`);
             res.status(404).json('Utilisateur non trouvé.');
         }
     } catch (err) {
-        logger.error('Erreur lors de la récupération du profil utilisateur :', err.message);
+        console.error('Erreur lors de la récupération du profil utilisateur :', err.message);
         res.status(500).send('Server error');
     }
 };
+
 
 // Mettre à jour le profil d'un utilisateur
 export const updateUser = async (req, res) => {

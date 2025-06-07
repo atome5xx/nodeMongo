@@ -18,9 +18,14 @@
         <h3 class="section-title">Liste des emprunts</h3>
         <% if (user.emprunt && user.emprunt.length> 0) { %>
             <ul class="emprunt-list">
-                <% user.emprunt.forEach(function(emprunt) { %>
-                    <li class="emprunt-item">
-                        <%= emprunt.name %> - Emprunté le <%= emprunt.debutEmprunt %>
+                <% emprunts.forEach(e=> { %>
+                    <li>
+                        Matériel : <%= e.materiel.name %> <br>
+                            Début : <%= e.debutEmprunt.toLocaleDateString() %> <br>
+                                Fin : <%= e.finEmprunt.toLocaleDateString() %> <br>
+                                    <div class="actions admin-actions">
+                                        <a href="" class="action-link">Rendre</a>
+                                    </div>
                     </li>
                     <% }); %>
             </ul>

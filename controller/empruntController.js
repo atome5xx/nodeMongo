@@ -1,7 +1,8 @@
-import EMPRUNT   from '../model/empruntModel.js';
-import USER      from '../model/userModel.js';
-import MATERIEL  from '../model/materielModel.js';
+import EMPRUNT from '../model/empruntModel.js';
+import USER from '../model/userModel.js';
+import MATERIEL from '../model/materielModel.js';
 import sendEmail from '../utils/email.js';
+import userController from './userController.js';
 
 
 export const reserverMateriel = async (req, res) => {
@@ -11,12 +12,12 @@ export const reserverMateriel = async (req, res) => {
     console.log('req.params     =', req.params);
     console.log('req.body       =', req.body);
 
-    const userId     = req.user.id;
+    const userId = req.user.id;
     const materielId = parseInt(req.params.materielId, 10);
     const { debutEmprunt, finEmprunt } = req.body;
 
     // 1) Récupère l’utilisateur et le matériel en base
-    const user     = await USER.findOne({ id: userId });
+    const user = await USER.findOne({ id: userId });
     const materiel = await MATERIEL.findOne({ id: materielId });
 
     if (!user || !materiel) {
@@ -26,7 +27,7 @@ export const reserverMateriel = async (req, res) => {
 
     // 2) Vérifier la cohérence des dates
     const debut = new Date(debutEmprunt);
-    const fin   = new Date(finEmprunt);
+    const fin = new Date(finEmprunt);
     if (isNaN(debut) || isNaN(fin) || debut >= fin) {
       console.warn('Dates invalides', { debutEmprunt, finEmprunt });
       return res.status(400).send('Dates de début/fin invalides ou incohérentes.');
@@ -34,21 +35,30 @@ export const reserverMateriel = async (req, res) => {
 
     // 3) Crée l’emprunt
     const nouvelleResa = new EMPRUNT({
-      user:        user._id,
-      materiel:    materiel._id,
+      user: user._id,
+      materiel: materiel._id,
       debutEmprunt: debut,
-      finEmprunt:   fin,
-      isValid:     'En attente',
-      isRendu:     false
+      finEmprunt: fin,
+      isValid: 'En attente',
+      isRendu: false
     });
 
     const saved = await nouvelleResa.save();
     console.log('Nouvelle réservation créée:', saved);
 
-     materiel.isDisponible = false;
+    materiel.isDisponible = false;
     await materiel.save();
     console.log(`Matériel #${materiel.id} passé en indisponible.`);
-    // 4) Redirection ou JSON
+    // 4) Ajouter l'emprunt à l'utilisateur
+    if (!Array.isArray(user.emprunt)) {
+      user.emprunt = [];
+    }
+    if (!user.emprunt.includes(saved._id)) {
+      user.emprunt.push(saved._id); // Assure-toi que `user.emprunt` est un tableau
+      await user.save();
+      console.log(`Emprunt #${saved._id} ajouté à l'utilisateur #${user.id}`);
+    }
+    // 5) Redirection ou JSON
     return res.redirect('/materiels');
   } catch (error) {
     console.error('Erreur réservation matériel :', error);
@@ -116,7 +126,7 @@ export const adminListReservations = async (req, res) => {
     .populate('materiel', 'name')
     .lean();
 
-  const pending   = all.filter(r => r.isValid === 'En attente');
+  const pending = all.filter(r => r.isValid === 'En attente');
   const processed = all.filter(r => r.isValid !== 'En attente');
 
   res.render('reservations/admin_list', { pending, processed });
@@ -209,7 +219,7 @@ const empruntController = {
   validerReservation,
   validerRetour,
   reserverMateriel,
-  signalerRetour, 
+  signalerRetour,
   listEmprunts,
   reservationFormView,
   adminListReservations
