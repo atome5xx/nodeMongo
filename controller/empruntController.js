@@ -140,6 +140,7 @@ export const signalerRetour = async (req, res) => {
   try {
     const empruntId = parseInt(req.params.empruntId, 10);
     const emprunt = await EMPRUNT.findOne({ id: empruntId });
+    stop();
     if (!emprunt) {
       return res.status(404).json({ message: 'Réservation non trouvée.' });
     }

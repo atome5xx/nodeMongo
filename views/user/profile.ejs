@@ -24,7 +24,7 @@
                             Début : <%= e.debutEmprunt.toLocaleDateString() %> <br>
                                 Fin : <%= e.finEmprunt.toLocaleDateString() %> <br>
                                     <div class="actions admin-actions">
-                                        <a href="" class="action-link">Rendre</a>
+                                        <a href="reservations/retour/<%= e.id%>" class="action-link">Rendre</a>
                                     </div>
                     </li>
                     <% }); %>

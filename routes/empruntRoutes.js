@@ -42,7 +42,7 @@ router.post(
   checkJWT, securityAdmin,
   empruntController.validerReservation
 );
-router.patch("/retour/:empruntId", checkJWT, empruntController.signalerRetour);
+router.post("/retour/:empruntId", checkJWT, empruntController.signalerRetour);
 router.patch("/valider-retour/:empruntId", checkJWT, securityAdmin, empruntController.validerRetour);
 
 
