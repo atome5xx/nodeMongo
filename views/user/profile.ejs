@@ -2,50 +2,90 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mon Profil</title>
-    <link rel="stylesheet" href="/css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon Profil</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
-    <div class="profile-container">
-        <h2 class="profile-name">
-            <%= user.firstName %>
-                <%= user.lastName %>
-        </h2>
+  <div class="profile-container">
+    <h2 class="profile-name">
+      <%= user.firstName %> <%= user.lastName %>
+    </h2>
 
-        <h3 class="section-title">Liste des emprunts</h3>
-        <% if (user.emprunt && user.emprunt.length> 0) { %>
-            <ul class="emprunt-list">
-                <% emprunts.forEach(e=> { %>
-                    <li>
-                        Matériel : <%= e.materiel.name %> <br>
-                            Début : <%= e.debutEmprunt.toLocaleDateString() %> <br>
-                                Fin : <%= e.finEmprunt.toLocaleDateString() %> <br>
-                                    <div class="actions admin-actions">
-                                        <a href="reservations/retour/<%= e.id%>" class="action-link">Rendre</a>
-                                    </div>
-                    </li>
-                    <% }); %>
-            </ul>
-            <% } else { %>
-                <p class="no-emprunt">Aucun emprunt en cours.</p>
-                <% } %>
+    <!-- Emprunts en attente de validation -->
+    <h3 class="section-title">Emprunts en attente de validation</h3>
+    <% if (empruntsEnAttente && empruntsEnAttente.length > 0) { %>
+      <ul class="emprunt-list">
+        <% empruntsEnAttente.forEach(e => { %>
+          <li>
+            Matériel : <%= e.materiel.nom %> <br />
+            Début : <%= new Date(e.debutEmprunt).toLocaleDateString() %> <br />
+            Fin : <%= new Date(e.finEmprunt).toLocaleDateString() %> <br />
+            <em>Status : En attente</em>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <p>Aucun emprunt en attente.</p>
+    <% } %>
 
-                    <% if (user.isAdmin) { %>
-                        <div class="actions admin-actions">
-                            <a href="/reservations/admin" class="action-link">Voir les demandes d'emprunts</a>
-                            <a href="/admin/retours" class="action-link">Voir les retours</a>
-                        </div>
-                        <% } %>
+    <!-- Emprunts validés -->
+    <h3 class="section-title">Emprunts validés</h3>
+    <% if (empruntsValides && empruntsValides.length > 0) { %>
+      <ul class="emprunt-list">
+        <% empruntsValides.forEach(e => { %>
+          <li>
+            Matériel : <%= e.materiel.nom %> <br />
+            Début : <%= new Date(e.debutEmprunt).toLocaleDateString() %> <br />
+            Fin : <%= new Date(e.finEmprunt).toLocaleDateString() %> <br />
+            <div class="actions admin-actions">
+              <form action="/reservations/retour/<%= e.id %>" method="POST" style="display:inline;">
+                <button type="submit" class="action-link" style="background:none; border:none; padding:0; cursor:pointer; color:#00f; text-decoration:underline;">
+                  Rendre
+                </button>
+              </form>
+            </div>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <p>Aucun emprunt validé.</p>
+    <% } %>
 
-                            <div class="actions user-actions">
-                                <a href="/materiels/" class="action-link">Demande d'emprunt</a>
-                                <a href="/users/edit/<%= user.id %>" class="action-link">Modifier le profil</a>
-                                <a href="/auth/logout" class="action-link">Se déconnecter</a>
-                            </div>
+    <!-- Emprunts en attente de retour -->
+    <h3 class="section-title">Emprunts en attente de retour</h3>
+    <% if (empruntsEnRetour && empruntsEnRetour.length > 0) { %>
+      <ul class="emprunt-list">
+        <% empruntsEnRetour.forEach(e => { %>
+          <li>
+            Matériel : <%= e.materiel.nom %> <br />
+            Début : <%= new Date(e.debutEmprunt).toLocaleDateString() %> <br />
+            Fin : <%= new Date(e.finEmprunt).toLocaleDateString() %> <br />
+            <em>Status : Retour en attente de validation</em>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <p>Aucun retour en attente de validation.</p>
+    <% } %>
+
+    <!-- Actions admin -->
+    <% if (user.isAdmin) { %>
+      <div class="actions admin-actions">
+        <a href="/reservations/admin" class="action-link">Voir les demandes d'emprunts</a>
+        <a href="/reservations/admin/retours" class="action-link">Voir les retours</a>
+      </div>
+    <% } %>
+
+    <!-- Actions utilisateur -->
+    <div class="actions user-actions">
+      <a href="/materiels/" class="action-link">Demande d'emprunt</a>
+      <a href="/users/edit/<%= user.id %>" class="action-link">Modifier le profil</a>
+      <a href="/auth/logout" class="action-link">Se déconnecter</a>
     </div>
+  </div>
 </body>
 
 </html>

@@ -1,0 +1,42 @@
+<!-- views/admin/retours.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retours à valider</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <div class="admin-container">
+    <h1 class="page-title">Retours en attente de validation</h1>
+
+    <% if (emprunts && emprunts.length > 0) { %>
+      <ul class="emprunt-list">
+        <% emprunts.forEach(emprunt => { %>
+          <li class="emprunt-item">
+            <div>
+              <strong><%= emprunt.user.firstName %> <%= emprunt.user.lastName %></strong> a emprunté
+              <strong><%= emprunt.materiel.name || emprunt.materiel.nom %></strong> <br />
+              Début : <%= new Date(emprunt.debutEmprunt).toLocaleDateString() %> <br />
+              Fin : <%= new Date(emprunt.finEmprunt).toLocaleDateString() %> <br />
+              <em>Status : Retour en attente de validation</em>
+            </div>
+            <div class="actions admin-actions" style="margin-top: 8px;">
+                <form action="/reservations/valider-retour/<%= emprunt.id %>?_method=PATCH" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-success">Valider retour</button>
+                </form>
+            </div>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <p>Aucun retour en attente de validation.</p>
+    <% } %>
+
+  </div>
+</body>
+
+</html>

@@ -40,7 +40,7 @@ export const reserverMateriel = async (req, res) => {
       debutEmprunt: debut,
       finEmprunt: fin,
       isValid: 'En attente',
-      isRendu: false
+      isRendu: 'Non Rendu'
     });
 
     const saved = await nouvelleResa.save();
@@ -163,21 +163,37 @@ export const adminListReservations = async (req, res) => {
 export const signalerRetour = async (req, res) => {
   try {
     const empruntId = parseInt(req.params.empruntId, 10);
-    const emprunt = await EMPRUNT.findOne({ id: empruntId });
-    stop();
-    if (!emprunt) {
-      return res.status(404).json({ message: 'Réservation non trouvée.' });
+    if (isNaN(empruntId)) {
+      console.log(`ID emprunt invalide: ${req.params.empruntId}`);
+      return res.status(400).send('ID emprunt invalide');
     }
 
-    emprunt.isRendu = true;
+    const emprunt = await EMPRUNT.findOne({ id: empruntId }).populate('user');
+    if (!emprunt) {
+      console.log(`Réservation non trouvée pour ID emprunt: ${empruntId}`);
+      return res.status(404).send('Réservation non trouvée.');
+    }
+
+    if (req.user.id !== emprunt.user.id) {
+      console.log(`Accès refusé à l'utilisateur ${req.user.id} pour emprunt ${empruntId}`);
+      return res.status(403).send('Accès refusé.');
+    }
+
+    emprunt.isRendu = "En attente";  // Passage en attente de validation admin
     await emprunt.save();
 
-    res.json({ message: 'Retour signalé. En attente de validation par un admin.' });
+    console.log(`Retour signalé avec succès pour emprunt ${empruntId} par utilisateur ${req.user.id}`);
+
+    // Redirection vers la page profil user
+    return res.redirect(`/users/${req.user.id}`);
+
   } catch (error) {
     console.error('Erreur signaler retour :', error);
-    res.status(500).json({ message: 'Erreur serveur lors de la signalisation du retour.' });
+    return res.status(500).send('Erreur serveur lors de la signalisation du retour.');
   }
 };
+
+
 
 /**
  * 📌 Un admin valide le retour
@@ -186,40 +202,53 @@ export const signalerRetour = async (req, res) => {
 export const validerRetour = async (req, res) => {
   try {
     const empruntId = parseInt(req.params.empruntId, 10);
-    const emprunt = await EMPRUNT.findOne({ id: empruntId });
+
+    const emprunt = await EMPRUNT.findOne({ id: empruntId })
+      .populate('materiel')
+      .populate('user');
+
     if (!emprunt) {
-      return res.status(404).json({ message: 'Réservation non trouvée.' });
-    }
-    if (!emprunt.isRendu) {
-      return res.status(400).json({ message: 'Le retour n\'a pas encore été signalé par l\'utilisateur.' });
+      return res.status(404).send('Réservation non trouvée.');
     }
 
-    // Remettre le matériel en dispo
-    const materiel = await MATERIEL.findOne({ id: emprunt.idMateriel });
-    if (!materiel) {
-      return res.status(500).json({ message: 'Matériel lié non trouvé.' });
+    if (emprunt.isRendu !== 'En attente') {
+      return res.status(400).send('Le retour n\'a pas encore été signalé par l\'utilisateur.');
     }
+
+    const materiel = emprunt.materiel;
+    if (!materiel) {
+      return res.status(500).send('Matériel lié non trouvé.');
+    }
+
     materiel.isDisponible = true;
     await materiel.save();
 
-    // Envoi d'un email de confirmation de retour
-    const user = await USER.findOne({ id: emprunt.idUser });
+    const user = emprunt.user;
     if (!user) {
-      return res.status(500).json({ message: 'Utilisateur lié non trouvé.' });
+      return res.status(500).send('Utilisateur lié non trouvé.');
     }
+
+    emprunt.isRendu = 'Rendu';
+    await emprunt.save();
+
     await sendEmail(
       user.email,
       'Confirmation de retour',
       'Votre retour a été validé.',
-      `<p>Bonjour ${user.firstName || user.nom},<br>Votre retour pour <strong>${materiel.name || materiel.nom}</strong> a été <strong>validé</strong>. Merci !</p>`
+      `<p>Bonjour ${user.firstName || user.nom},<br>Votre retour pour <strong>${materiel.nom || materiel.name}</strong> a été <strong>validé</strong>. Merci !</p>`
     );
 
-    res.json({ message: 'Retour validé, matériel remis en disponibilité et email envoyé.' });
+    // ✅ Redirection après succès
+    res.redirect('/reservations/admin/retours');
+
   } catch (error) {
     console.error('Erreur validation retour :', error);
-    res.status(500).json({ message: 'Erreur serveur lors de la validation du retour.' });
+    res.status(500).send('Erreur serveur lors de la validation du retour.');
   }
 };
+
+
+
 
 export const listEmprunts = async (req, res) => {
   try {
@@ -240,6 +269,18 @@ export const listEmprunts = async (req, res) => {
   }
 };
 
+export const adminListRetours = async (req, res) => {
+  try {
+    // récupérer les emprunts en attente de retour ou autre logique métier
+    const emprunts = await EMPRUNT.find({ isRendu: 'En attente' }).populate('user materiel').lean();
+    res.render('admin/retours', { emprunts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erreur serveur');
+  }
+};
+
+
 const empruntController = {
   validerReservation,
   validerRetour,
@@ -247,7 +288,8 @@ const empruntController = {
   signalerRetour,
   listEmprunts,
   reservationFormView,
-  adminListReservations
+  adminListReservations,
+  adminListRetours
 };
 
 export default empruntController;

@@ -2,7 +2,6 @@ import MATERIEL from "../model/materielModel.js";
 import jwt from 'jsonwebtoken';
 
 export const createMateriel = async (req, res) => {
-  // cast de la checkbox
   const isDisponible = !!req.body.isDisponible;
   const data = {
     name: req.body.name,
@@ -15,11 +14,9 @@ export const createMateriel = async (req, res) => {
 
   try {
     await new MATERIEL(data).save();
-    // redirection VERS la liste
     return res.redirect('/materiels');
   } catch (err) {
     console.error('Erreur création matériel :', err);
-    // si erreurs Mongoose ou custom, on ré-affiche le form
     const errors = err.name === 'ValidationError'
       ? Object.values(err.errors).map(e => ({ msg: e.message }))
       : [{ msg: err.message }];
@@ -27,12 +24,10 @@ export const createMateriel = async (req, res) => {
   }
 };
 
-
-// Obtenir les détails d’un matériel par ID
 export const getMateriel = async (req, res) => {
   const materielId = parseInt(req.params.id, 10);
   try {
-    const materiel = await MATERIEL.findOne({ id: materielId }).exec();
+    const materiel = await MATERIEL.findOne({ id: materielId }).lean();
     if (!materiel) {
       return res.status(404).json({ message: 'Matériel non trouvé.' });
     }
@@ -43,31 +38,44 @@ export const getMateriel = async (req, res) => {
 };
 
 export const updateMateriel = async (req, res) => {
-  // on récupère l'id caché et on cast la checkbox
-  const materielId = req.body.id;
+  const materielId = parseInt(req.body.id, 10); // S'assurer que c'est bien un nombre
   const isDisponible = !!req.body.isDisponible;
+
   const updates = {
     name: req.body.name,
     description: req.body.description,
-    serieNumber: req.body.serieNumber,
+    serieNumber: parseInt(req.body.serieNumber, 10),
     picture: req.body.picture,
     isDisponible,
     state: req.body.state
   };
 
   try {
+    // Vérifie si un autre matériel a déjà ce numéro de série
+    const existing = await MATERIEL.findOne({
+      serieNumber: updates.serieNumber,
+      id: { $ne: materielId } // exclut le matériel actuel
+    });
+
+    if (existing) {
+      return res.status(400).render('materiels/form', {
+        materiel: { id: materielId, ...updates },
+        errors: [{ msg: 'Ce numéro de série est déjà utilisé par un autre matériel.' }]
+      });
+    }
+
     const result = await MATERIEL.updateOne(
       { id: materielId },
       { $set: updates }
     );
+
     if (result.matchedCount === 0) {
-      // cas où l'id n'existe pas
       return res.status(404).render('materiels/form', {
         materiel: { id: materielId, ...updates },
         errors: [{ msg: 'Matériel non trouvé pour mise à jour.' }]
       });
     }
-    // redirection vers la liste
+
     return res.redirect('/materiels');
   } catch (err) {
     console.error('Erreur mise à jour matériel :', err);
@@ -82,8 +90,6 @@ export const updateMateriel = async (req, res) => {
 };
 
 
-
-// Supprimer un matériel
 export const deleteMateriel = async (req, res) => {
   const materielId = parseInt(req.params.id, 10);
   try {
@@ -97,23 +103,29 @@ export const deleteMateriel = async (req, res) => {
   }
 };
 
-// Lister tous les matériels
 export const listMaterielsView = async (req, res) => {
-  const materiels = await MATERIEL.find({}).lean();
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).send('Token manquant');
+  try {
+    const materiels = await MATERIEL.find({}).lean();
+
+    // Récupération du token depuis cookie
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).send('Token manquant');
+    }
+
+    // Vérifier et décoder le token JWT
+    const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+    const { id, isAdmin } = decoded.user;
+
+    res.render('materiels/list', {
+      materiels,
+      userId: id,
+      admin: isAdmin,
+    });
+  } catch (error) {
+    console.error("Erreur affichage liste matériels:", error);
+    res.status(500).send("Erreur serveur lors de l'affichage de la liste des matériels.");
   }
-
-  const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-  const { id, isAdmin } = decoded.user;
-
-  // Envoie la vue avec les données
-  res.render('materiels/list', {
-    materiels,
-    userId: id,
-    admin: isAdmin,
-  });
 };
 
 export const formMaterielView = async (req, res) => {
@@ -121,15 +133,16 @@ export const formMaterielView = async (req, res) => {
     let materiel = null;
     if (req.params.id) {
       materiel = await MATERIEL.findOne({ id: parseInt(req.params.id, 10) }).lean();
+      if (!materiel) {
+        return res.status(404).send("Matériel non trouvé");
+      }
     }
-    // Passe toujours errors, même vide
     res.render('materiels/form', { materiel, errors: [] });
   } catch (err) {
     console.error(err);
     res.status(500).send("Erreur serveur lors de l'affichage du formulaire.");
   }
 };
-
 
 const materielController = {
   getMateriel,

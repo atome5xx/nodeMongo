@@ -45,5 +45,7 @@ router.post(
 router.post("/retour/:empruntId", checkJWT, empruntController.signalerRetour);
 router.patch("/valider-retour/:empruntId", checkJWT, securityAdmin, empruntController.validerRetour);
 
+// Route GET pour afficher les retours dans l'admin
+router.get('/admin/retours', checkJWT, securityAdmin, empruntController.adminListRetours);
 
 export default router;

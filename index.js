@@ -4,12 +4,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import materielRoutes from './routes/materielRoutes.js';
 import empruntRoutes from './routes/empruntRoutes.js';
-import './utils/scheduler.js';  // <=== Import du scheduler ici
+import './utils/scheduler.js';  // Scheduler lancé ici
 
 dotenv.config(); // Doit être appelé avant tout autre code
 
@@ -20,34 +21,42 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1) Configuration du moteur de vues (EJS)
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// Connexion MongoDB
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/Labo';
 
-// 2) Middlewares pour les formulaires & JSON
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('✅ Connecté à MongoDB');
 
-app.use(cookieParser());
+  // Configuration express
 
-// 3) method-override pour supporter PUT/DELETE dans les formulaires HTML
-app.use(methodOverride('_method'));
+  app.set('views', path.join(__dirname, 'views'));
+  app.set('view engine', 'ejs');
 
-// 4) Dossier static pour CSS, images…
-app.use('/css', express.static(path.join(__dirname, 'public/css')));
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(cookieParser());
+  app.use(methodOverride('_method'));
+  app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
-app.get('/', (req, res) => {
-  res.render('authentification/login');
-});
+  app.get('/', (req, res) => {
+    res.render('authentification/login');
+  });
 
-// Montée des routes avec le bon préfixe "/auth"
-app.use('/auth', authRoutes);
+  app.use('/auth', authRoutes);
+  app.use('/users', userRoutes);
+  app.use('/materiels', materielRoutes);
+  app.use('/reservations', empruntRoutes);
 
-app.use('/users', userRoutes);
-app.use('/materiels', materielRoutes);
-app.use('/reservations', empruntRoutes);
+  // Lancement serveur
+  app.listen(PORT, () => {
+    console.log(`App listening on port ${PORT}`);
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+  });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-  console.log('JWT_SECRET:', process.env.JWT_SECRET);
+}).catch(err => {
+  console.error('❌ Erreur de connexion à MongoDB:', err);
+  process.exit(1);
 });

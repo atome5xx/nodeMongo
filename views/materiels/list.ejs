@@ -12,8 +12,8 @@
     <h1>Liste des Matériels</h1>
     <% if (admin) { %>
       <a href="/materiels/create" class="btn">Ajouter un matériel</a>
-      <% } %>
-        <a href="/users/<%= userId %>" class="btn">Retour</a>
+    <% } %>
+    <a href="/users/<%= userId %>" class="btn">Retour</a>
   </header>
 
   <table>
@@ -29,45 +29,33 @@
       </tr>
     </thead>
     <tbody>
-      <% materiels.forEach(m=> { %>
+      <% materiels.forEach(m => { %>
         <tr>
+          <td><%= m.id %></td>
+          <td><%= m.name %></td>
+          <td><%= m.description %></td>
+          <td><%= m.serieNumber %></td>
+          <td><%= m.state %></td>
+          <td><%= m.isDisponible ? 'Oui' : 'Non' %></td>
           <td>
-            <%= m.id %>
-          </td>
-          <td>
-            <%= m.name %>
-          </td>
-          <td>
-            <%= m.description %>
-          </td>
-          <td>
-            <%= m.serieNumber %>
-          </td>
-          <td>
-            <%= m.state %>
-          </td>
-          <td>
-            <%= m.isDisponible ? 'Oui' : 'Non' %>
-          </td>
-          <td>
-            <a href="/materiels/<%= m.id %>/edit" class="btn-small">Modifier</a>
+            <% if (admin) { %>
+              <a href="/materiels/<%= m.id %>/edit" class="btn-small">Modifier</a>
+            <% } %>
 
-            <!-- Bouton Supprimer -->
             <form action="/materiels/<%= m.id %>?_method=DELETE" method="POST" style="display:inline">
               <button type="submit" class="btn-small danger">Supprimer</button>
             </form>
 
-            <!-- Bouton Emprunter (si disponible) -->
             <% if (m.isDisponible) { %>
               <a href="/reservations/reserver/<%= m.id %>" class="btn-small" style="margin-left:4px;">
                 Emprunter
               </a>
-              <% } else { %>
-                <button class="btn-small danger" disabled>Indisponible</button>
-                <% } %>
+            <% } else { %>
+              <button class="btn-small danger" disabled>Indisponible</button>
+            <% } %>
           </td>
         </tr>
-        <% }) %>
+      <% }) %>
     </tbody>
   </table>
 </body>

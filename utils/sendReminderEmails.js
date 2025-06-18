@@ -1,26 +1,8 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import sendEmail from './email.js';
-
 import Emprunt from '../model/empruntModel.js';
 
-dotenv.config();
-
-const MONGO_URI = process.env.MONGODB_URI;
-
 export async function sendReminders() {
-  if (!MONGO_URI) {
-    console.error('❌ MONGODB_URI est introuvable dans le fichier .env');
-    process.exit(1);
-  }
-
   try {
-    await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('✅ Connecté à MongoDB');
-
     const now = new Date();
     const reminderStart = new Date(now.getTime() + 23 * 60 * 60 * 1000);
     const reminderEnd = new Date(now.getTime() + 25 * 60 * 60 * 1000);
@@ -28,11 +10,13 @@ export async function sendReminders() {
     const emprunts = await Emprunt.find({
       finEmprunt: { $gte: reminderStart, $lte: reminderEnd },
       isValid: 'Validé',
-      isRendu: false,
+      isRendu: 'Non Rendu',
+      isRappelEnvoye: false  // Ne pas envoyer plusieurs fois
     }).populate('user').populate('materiel');
 
     if (emprunts.length === 0) {
       console.log('ℹ️ Aucun emprunt à rappeler.');
+      return;
     }
 
     for (const emprunt of emprunts) {
@@ -57,12 +41,14 @@ LabManager`;
 <p>Cordialement,<br>LabManager</p>`;
 
       await sendEmail(user.email, subject, text, html);
+
+      // Mise à jour pour éviter de renvoyer un rappel
+      emprunt.isRappelEnvoye = true;
+      await emprunt.save();
     }
 
     console.log(`✅ ${emprunts.length} rappel(s) envoyé(s)`);
   } catch (error) {
     console.error('❌ Erreur lors de l\'envoi des rappels :', error);
-  } finally {
-    await mongoose.disconnect();
   }
 }

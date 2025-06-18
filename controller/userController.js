@@ -5,24 +5,34 @@ import sendEmail from '../utils/email.js';
 import bcrypt from 'bcryptjs';
 
 // Afficher les données d'un utilisateur
+// Afficher les données d'un utilisateur
 export const getProfile = async (req, res) => {
     const userId = parseInt(req.params.id, 10);
     try {
         const user = await USER.findOne({ id: userId }, { _id: 0 })
             .populate({
-                path: 'emprunt', // Champ à peupler
+                path: 'emprunt',
                 populate: {
-                    path: 'materiel', // Si tu veux aussi les détails du matériel
+                    path: 'materiel',
                     model: 'Materiels'
                 }
             })
             .exec();
 
         if (user) {
-            console.log(user.emprunt);
+            const empruntsEnAttente = user.emprunt.filter(e => e.isValid === 'En attente' && e.isRendu === 'Non Rendu');
+            const empruntsValides = user.emprunt.filter(e => e.isValid === 'Validé' && e.isRendu === 'Non Rendu');
+            const empruntsEnRetour = user.emprunt.filter(e => e.isValid === 'Validé' && e.isRendu === 'En attente');
+
+            console.log('Emprunts en attente:', empruntsEnAttente);
+            console.log('Emprunts validés:', empruntsValides);
+            console.log('Emprunts en attente de retour:', empruntsEnRetour);
+
             res.render('user/profile', {
-                user: user,
-                emprunts: user.emprunt, // Liste des emprunts avec détails
+                user,
+                empruntsEnAttente,
+                empruntsValides,
+                empruntsEnRetour
             });
         } else {
             console.warn(`Utilisateur non trouvé pour l'ID ${userId}.`);
@@ -33,6 +43,8 @@ export const getProfile = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
+
 
 
 // Mettre à jour le profil d'un utilisateur
@@ -195,33 +207,38 @@ export const delEmprunt = async (req, res) => {
 
 // Afficher les emprunts d'un utilisateur
 export const affEmprunt = async (req, res) => {
-    try {
-        const userId = parseInt(req.params.id, 10);
+  try {
+    const userId = parseInt(req.params.id, 10);
 
-        if (isNaN(userId)) {
-            return res.status(400).json('ID utilisateur invalide.');
-        }
-
-        const user = await USER.findOne({ id: userId }).exec();
-        if (!user) {
-            logger.warn(`Utilisateur non trouvé pour l'ID ${userId}.`);
-            return res.status(404).json('Utilisateur non trouvé.');
-        }
-
-        const empruntIds = user.emprunt;
-
-        if (empruntIds.length === 0) {
-            return res.status(200).json('Aucun emprunt dans la liste.');
-        }
-
-        const materiels = await MATERIEL.find({ id: { $in: empruntIds } }).exec();
-        const materielTitles = materiels.map(materiel => materiel.nom);
-
-        res.status(200).json({ emprunts: materielTitles });
-    } catch (error) {
-        res.status(500).json('Erreur lors de l\'affichage des emprunts.');
+    if (isNaN(userId)) {
+      return res.status(400).json('ID utilisateur invalide.');
     }
+
+    const user = await USER.findOne({ id: userId }).exec();
+    if (!user) {
+      return res.status(404).json('Utilisateur non trouvé.');
+    }
+
+    // Récupérer emprunts en attente et validés pour cet utilisateur
+    const emprunts = await EMPRUNT.find({ 
+      user: user._id, 
+      isValid: { $in: ['En attente', 'Validé'] } 
+    })
+    .populate('materiel', 'nom')
+    .exec();
+
+    // Séparer en deux listes
+    const empruntsEnAttente = emprunts.filter(e => e.isValid === 'En attente');
+    const empruntsValides = emprunts.filter(e => e.isValid === 'Validé');
+
+    res.status(200).json({ empruntsEnAttente, empruntsValides });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Erreur lors de l\'affichage des emprunts.');
+  }
 };
+
+
 
 export const showEditForm = async (req, res) => {
     const userId = req.user.id; // ID injecté via le middleware
