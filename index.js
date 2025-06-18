@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import materielRoutes from './routes/materielRoutes.js';
 import empruntRoutes from './routes/empruntRoutes.js';
+import './utils/scheduler.js';  // <=== Import du scheduler ici
 
 dotenv.config(); // Doit être appelé avant tout autre code
 

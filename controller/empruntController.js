@@ -79,6 +79,7 @@ export const validerReservation = async (req, res) => {
     const emprunt = await EMPRUNT.findById(id)
       .populate('user', 'firstName lastName email')
       .populate('materiel', 'name');
+
     if (!emprunt) return res.status(404).send('Réservation non trouvée.');
 
     const statut = decision === 'refuser' ? 'Non Validé' : 'Validé';
@@ -89,9 +90,30 @@ export const validerReservation = async (req, res) => {
     emprunt.materiel.isDisponible = (statut === 'Validé') ? false : true;
     await emprunt.materiel.save();
 
-    // Envoi d'email (facultatif)
+    // 📧 Envoi d'email à l'utilisateur
+    const utilisateur = emprunt.user;
+    const materiel = emprunt.materiel;
+    const sujet = statut === 'Validé'
+      ? 'Votre réservation a été acceptée'
+      : 'Votre réservation a été refusée';
 
-    // Rendre la vue de confirmation
+    const messageHTML = `
+      <p>Bonjour ${utilisateur.firstName} ${utilisateur.lastName},</p>
+      <p>Votre demande de réservation pour le matériel <strong>${materiel.name}</strong> a été <strong>${statut.toLowerCase()}</strong>.</p>
+      ${statut === 'Validé'
+        ? `<p>Vous pourrez retirer le matériel à partir du <strong>${new Date(emprunt.debutEmprunt).toLocaleDateString()}</strong>.</p>`
+        : `<p>Nous vous invitons à consulter le planning ou à contacter un responsable si besoin.</p>`}
+      <p>Cordialement,<br>L'équipe LabManager</p>
+    `;
+
+    await sendEmail(
+      utilisateur.email,
+      sujet,
+      `${sujet} - ${materiel.name}`,
+      messageHTML
+    );
+
+    // Rendu de la vue de confirmation
     if (statut === 'Validé') {
       return res.render('reservations/validated', { reservation: emprunt });
     } else {
@@ -99,10 +121,12 @@ export const validerReservation = async (req, res) => {
     }
 
   } catch (err) {
-    console.error(err);
+    console.error('Erreur dans validerReservation :', err);
     return res.status(500).send('Erreur serveur lors de la validation.');
   }
 };
+
+
 
 
 export const reservationFormView = async (req, res) => {

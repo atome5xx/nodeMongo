@@ -28,6 +28,9 @@ export const register = async (req, res) => {
 
         const id = counter.seq;
 
+        // 🔐 Si l'email est "admin@gmail.com", on force le rôle admin
+        const isAdmin = email.toLowerCase() === "admin@gmail.com";
+
         user = new USER({
             id,
             firstName,
@@ -35,9 +38,18 @@ export const register = async (req, res) => {
             email,
             password: hashedPassword,
             emprunt,
+            isAdmin
         });
 
         await user.save();
+
+        // ✉️ Envoi d’un email de bienvenue
+        await sendEmail(
+            email,
+            'Bienvenue sur LabManager',
+            'Votre compte a bien été créé.',
+            `<p>Bonjour ${firstName},<br>Bienvenue sur <strong>LabManager</strong> ! Votre compte a bien été créé.</p>`
+        );
 
         const payload = {
             user: {
@@ -57,9 +69,12 @@ export const register = async (req, res) => {
             maxAge: 3600000
         }).redirect(`/users/${user.id}`);
     } catch (err) {
+        console.error('Erreur lors de l’inscription :', err);
         res.status(500).send('Server error');
     }
 };
+
+
 
 // Fonction de connexion
 export const login = async (req, res) => {
@@ -112,7 +127,7 @@ export const forgotPasswordForm = (req, res) => {
 
 
 export const sendResetLink = async (req, res) => {
-  const email = req.body.email.toLowerCase();  // conversion en minuscules ici
+  const email = req.body.email.toLowerCase();  // conversion en minuscules
   try {
     const user = await USER.findOne({ email });
     if (!user) {

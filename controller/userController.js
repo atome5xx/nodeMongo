@@ -1,6 +1,8 @@
 import USER from "../model/userModel.js";
 import Emprunt from "../model/empruntModel.js";
 import MATERIEL from "../model/materielModel.js";
+import sendEmail from '../utils/email.js';
+import bcrypt from 'bcryptjs';
 
 // Afficher les données d'un utilisateur
 export const getProfile = async (req, res) => {
@@ -40,51 +42,77 @@ export const updateUser = async (req, res) => {
     const userLastName = req.body.lastName;
     const userEmail = req.body.email;
     const userPassword = req.body.password;
-    console.log(userId);
+
     try {
-        const user = await USER.findOne({ id: userId }, { _id: 0 }).exec();
+        const user = await USER.findOne({ id: userId }).exec();
 
-        if (user) {
-            const misesAJour = {};
-            if (userFirstName !== undefined) misesAJour.firstName = userFirstName;
-            if (userLastName !== undefined) misesAJour.lastName = userLastName;
-            if (userEmail !== undefined) misesAJour.email = userEmail;
-            if (userPassword !== undefined) misesAJour.password = userPassword;
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
 
-            const result = await USER.updateOne({ id: userId }, { $set: misesAJour });
+        const misesAJour = {};
+        if (userFirstName !== undefined) misesAJour.firstName = userFirstName;
+        if (userLastName !== undefined) misesAJour.lastName = userLastName;
+        if (userEmail !== undefined) misesAJour.email = userEmail;
 
-            if (result.matchedCount === 1 && result.modifiedCount === 1) {
-                res.status(200).json({
-                    message: "Utilisateur mis à jour avec succès",
-                    redirect: `/users/${userId}`
-                });
-            } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
-                res.status(200).json({ message: "Aucune modification effectuée" });
-            } else {
-                res.status(404).json({ message: "Utilisateur non trouvé" });
-            }
+        if (userPassword !== undefined && userPassword.trim() !== '') {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(userPassword, salt);
+            misesAJour.password = hashedPassword;
+        }
+
+        const result = await USER.updateOne({ id: userId }, { $set: misesAJour });
+
+        if (result.matchedCount === 1 && result.modifiedCount === 1) {
+            res.status(200).json({
+                message: "Utilisateur mis à jour avec succès",
+                redirect: `/users/${userId}`
+            });
+        } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
+            res.status(200).json({ message: "Aucune modification effectuée" });
         } else {
             res.status(404).json({ message: "Utilisateur non trouvé" });
         }
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: "Erreur serveur lors de la mise à jour de l'utilisateur", error });
     }
-}
+};
+
 
 // Supprimer un utilisateur
 export const deleteUser = async (req, res) => {
     const userId = parseInt(req.params.id, 10);
+
     try {
-        const result = await USER.deleteOne({ id: userId }).exec();
-        if (result.deletedCount === 0) {
-            return res.status(404).json('Aucun utilisateur trouvé.');
+        const user = await USER.findOne({ id: userId });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Aucun utilisateur trouvé.' });
         }
 
-        res.status(200).json('Utilisateur supprimé avec succès.');
+        await USER.deleteOne({ id: userId });
+
+        // 📨 Envoi de l'e-mail de confirmation
+        await sendEmail(
+            user.email,
+            'Suppression de votre compte',
+            'Votre compte a bien été supprimé.',
+            `<p>Bonjour ${user.firstName},<br>Votre compte a été <strong>supprimé</strong> avec succès. Si vous n'êtes pas à l'origine de cette action, contactez-nous immédiatement.</p>`
+        );
+
+        // ❌ Suppression du cookie
+        res.clearCookie('token');
+
+        // Réponse JSON ou redirection selon ton usage
+        res.status(200).json({ message: 'Utilisateur supprimé avec succès.', redirect: '/' });
+
     } catch (error) {
-        res.status(500).json('Erreur lors de la suppression de l\'utilisateur.');
+        console.error('Erreur lors de la suppression :', error);
+        res.status(500).json({ message: 'Erreur lors de la suppression de l\'utilisateur.' });
     }
-}
+};
+
 
 // Ajouter un materiel aux emprunts d'un utilisateur
 export const addEmprunt = async (req, res) => {
