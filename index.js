@@ -51,7 +51,7 @@ mongoose.connect(MONGO_URI, {
   app.use('/reservations', empruntRoutes);
 
   // Lancement serveur
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`App listening on port ${PORT}`);
     console.log('JWT_SECRET:', process.env.JWT_SECRET);
   });
