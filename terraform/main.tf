@@ -1,97 +1,72 @@
 provider "azurerm" {
   features {}
-
-  subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  client_id       = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  client_secret   = "your_client_secret"
-  tenant_id       = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
 
-resource "azurerm_resource_group" "rg" {
-  name     = "tf-resource-group"
-  location = "France Central"
+variable "resource_group_name" {
+  type    = string
+  default = "SDFORM"
 }
 
-resource "azurerm_virtual_network" "vnet" {
-  name                = "tf-vnet"
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+variable "location" {
+  type    = string
+  default = "francecentral"
 }
 
-resource "azurerm_subnet" "subnet" {
-  name                 = "tf-subnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
+variable "vm_name" {
+  type    = string
+  default = "VM-ADDS"
 }
 
-resource "azurerm_network_interface" "nic" {
-  name                = "tf-nic"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.public_ip.id
-  }
+variable "os_disk_id" {
+  type = string
+  default = "/subscriptions/2f982fe1-7206-421f-abcd-b7575cbd9185/resourceGroups/SDFORM/providers/Microsoft.Compute/disks/VM-ADDS_OsDisk_1_91f0471096c14d24b07aa326af76f4ff"
 }
 
-resource "azurerm_public_ip" "public_ip" {
-  name                = "tf-public-ip"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+variable "network_interface_id" {
+  type = string
+  default = "/subscriptions/2f982fe1-7206-421f-abcd-b7575cbd9185/resourceGroups/SDFORM/providers/Microsoft.Network/networkInterfaces/vm-adds676"
 }
 
-resource "azurerm_network_security_group" "nsg" {
-  name                = "tf-nsg"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule {
-    name                       = "AllowHTTP3000"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "3000"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-}
-
-resource "azurerm_network_interface_security_group_association" "nic_nsg_assoc" {
-  network_interface_id      = azurerm_network_interface.nic.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-
-resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "tf-linux-vm"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+resource "azurerm_windows_virtual_machine" "vm_adds" {
+  name                = var.vm_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
   size                = "Standard_B2s"
-  admin_username      = "azureuser"
+  admin_username      = "admin_sd"
+  admin_password      = "ChangeMe123!"  # Attention, sécuriser ce mot de passe
+
   network_interface_ids = [
-    azurerm_network_interface.nic.id,
+    var.network_interface_id
   ]
-
-  admin_password = "Pa$$w0rd1234!"
-
-  disable_password_authentication = false
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "StandardSSD_LRS"
+    managed_disk_id      = var.os_disk_id
+    disk_size_gb         = 127
   }
 
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "20_04-lts"
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2022-datacenter-azure-edition"
     version   = "latest"
+  }
+
+  os_profile_windows_config {
+    provision_vm_agent        = true
+    enable_automatic_upgrades = true
+    patch_mode               = "AutomaticByOS"
+    allow_extension_operations = true
+    require_guest_provision_signal = true
+  }
+
+  security_type = "TrustedLaunch"
+
+  # Trusted Launch UEFI and vTPM settings (not yet supported by terraform azurerm provider as of now)
+  # Note: This may need azurerm provider update or be set via ARM template deployment.
+
+  boot_diagnostics {
+    enabled = true
   }
 }
